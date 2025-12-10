@@ -1,0 +1,77 @@
+
+function ProductDwr() { }
+
+ProductDwr.setProductService = function(p0, callback)
+{
+    DWREngine._execute('/tody/dwr', 'ProductDwr', 'setProductService', p0, callback);
+}
+
+ProductDwr.setModuleService = function(p0, callback)
+{
+    DWREngine._execute('/tody/dwr', 'ProductDwr', 'setModuleService', p0, callback);
+}
+
+ProductDwr.findSubVersions = function(p0, p1, callback)
+{
+    DWREngine._execute('/tody/dwr', 'ProductDwr', 'findSubVersions', p0, p1, callback);
+}
+
+ProductDwr.findSimpleModules = function(p0, callback)
+{
+    DWREngine._execute('/tody/dwr', 'ProductDwr', 'findSimpleModules', p0, callback);
+}
+
+ProductDwr.findRegMainVersions = function(p0, p1, p2, p3, callback)
+{
+    DWREngine._execute('/tody/dwr', 'ProductDwr', 'findRegMainVersions', p0, p1, p2, p3, callback);
+}
+
+ProductDwr.findRegSubVersions = function(p0, p1, p2, p3, callback)
+{
+    DWREngine._execute('/tody/dwr', 'ProductDwr', 'findRegSubVersions', p0, p1, p2, p3, callback);
+}
+
+ProductDwr.findSearchMainVersions = function(p0, p1, p2, callback)
+{
+    DWREngine._execute('/tody/dwr', 'ProductDwr', 'findSearchMainVersions', p0, p1, p2, callback);
+}
+
+ProductDwr.findSearchSubVersions = function(p0, p1, p2, p3, callback)
+{
+    DWREngine._execute('/tody/dwr', 'ProductDwr', 'findSearchSubVersions', p0, p1, p2, p3, callback);
+}
+
+ProductDwr.addProdAttributeConfig = function(p0, p1, p2, p3, callback)
+{
+    DWREngine._execute('/tody/dwr', 'ProductDwr', 'addProdAttributeConfig', p0, p1, p2, p3, callback);
+}
+
+ProductDwr.findProductAttrCfg = function(p0, p1, callback)
+{
+    DWREngine._execute('/tody/dwr', 'ProductDwr', 'findProductAttrCfg', p0, p1, callback);
+}
+
+ProductDwr.changeToProductManager = function(p0, p1, p2, callback)
+{
+    DWREngine._execute('/tody/dwr', 'ProductDwr', 'changeToProductManager', p0, p1, p2, callback);
+}
+
+ProductDwr.changeToProductManagerAll = function(p0, p1, callback)
+{
+    DWREngine._execute('/tody/dwr', 'ProductDwr', 'changeToProductManagerAll', p0, p1, callback);
+}
+
+ProductDwr.findVersions = function(p0, callback)
+{
+    DWREngine._execute('/tody/dwr', 'ProductDwr', 'findVersions', p0, callback);
+}
+
+ProductDwr.findModules = function(p0, callback)
+{
+    DWREngine._execute('/tody/dwr', 'ProductDwr', 'findModules', p0, callback);
+}
+
+ProductDwr.setVersionService = function(p0, callback)
+{
+    DWREngine._execute('/tody/dwr', 'ProductDwr', 'setVersionService', p0, callback);
+}

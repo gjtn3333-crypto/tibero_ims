@@ -1,0 +1,1147 @@
+﻿function objVisible(chkVal, objId, issueId, userId) {
+	var updateYN = IssueDwr.updateCriticalIssue(issueId, chkVal, userId,
+			updateCIssueAfterProcess);
+	document.getElementById(objId).style.display = (chkVal == 'Y')
+			? ""
+			: "none";
+}
+
+function updateVersionConnectGroup(connectType, versionCode, productCode,
+		groupCode, flagId, i) {
+	var flags = document.getElementsByName(flagId);
+	var criticalChkFlag = flags[i].checked ? "Y" : "N";
+	VersionDwr.updateVersionConnectGroup(connectType, versionCode, productCode,
+			groupCode, criticalChkFlag, updateVersConAfter);
+}
+
+function updateVersConAfter(message) {
+	if (message == 1) {
+		alert("Critical condition of this version was changed.");
+	} else {
+		alert("Oops! An error occurred while updating the file.");
+	}
+}
+
+function updateCIssueAfterProcess(message) {
+	if (message == 1) {
+		alert("Critical state of issue was changed.");
+	} else {
+		alert("Oops! An error occurred while updating the file.");
+	}
+}
+
+// #############################################
+// 함수명: submitIssueForm
+// 기능: 필수입력사항이 입력되어 있는지 확인한다.
+// 호출시점: issueForm.jsp에서의 issue등록 저장버튼 클릭시
+// 인수: f: form객체, flag: (신규 or 수정)
+// 리턴: 필수사항입력이상 유무(true, false)
+// #############################################
+function submitIssueForm(isNew) {
+	var bnClickYN = getValue('bnClickYN');
+	if (bnClickYN == "N") {
+		return;
+	}
+
+	var f = document.forms[0];
+
+	// Version과 patchVersion 설정 ======================================
+	var v_patchVersionCode = document.getElementById("patchVersionCode");
+	var v_patchMainVersionCode = document.getElementById("patchMainVersionCode");
+	var v_patchSubVersionCode = document.getElementById("patchSubVersionCode");
+	v_patchVersionCode.value = "";
+
+	if (v_patchMainVersionCode != null) {
+		if (isNull(v_patchSubVersionCode.value)) {
+			v_patchVersionCode.value = v_patchMainVersionCode.value;
+		} else {
+			v_patchVersionCode.value = v_patchSubVersionCode.value;
+		}
+	}
+
+	var mainVersionCode = getComboBoxValue(f.mainVersionCode);
+	var subVersionYN = f.sversionYN.value;
+	var subVersionCode = f.subVersionCode.value;
+
+	if (isNull(document.getElementById("subVersionCode").value)) {
+		document.getElementById("versionCode").value = document.getElementById("mainVersionCode").value;
+	} else {
+		document.getElementById("versionCode").value = document.getElementById("subVersionCode").value;
+	}
+
+
+	var btnType = f.btnType.value;
+	// =====================================================
+
+	// 버전코드 세팅
+	subVersionCode = getComboBoxValue(f.subVersionCode);
+	if (isNull(subVersionCode)) {
+		f.versionCode.value = mainVersionCode;
+	} else {
+		f.versionCode.value = subVersionCode;
+	}
+
+	if (!isNull(f.patchMainVersionCode)) {
+		var patchMainVersionCode = getComboBoxValue(f.patchMainVersionCode);
+		var patchSubVersionCode = getComboBoxValue(f.patchSubVersionCode);
+		if (!isNull(patchSubVersionCode)) {
+			f.patchVersionCode.value = patchSubVersionCode;
+		} else {
+			if (!isNull(patchMainVersionCode)) {
+				f.patchVersionCode.value = patchMainVersionCode;
+			} else {
+				f.patchVersionCode.value = "";
+			}
+		}
+	}
+
+	// 화면설정저장일 경우
+	if (btnType == 'viewSAVE') {
+		if (isNull(f.templateName.value)) {
+			if (!errorMessage(f.templateName, "Please enter a Template Name.")) {
+				return;
+			}
+		}
+		document.getElementById("descReSetting").value = "N";
+		f.action = "ims/issue/imeMenuIniCfgProcess.do";
+		jQuery("#load").show();
+		f.submit();
+		return;
+	}
+
+	//화면설정삭제인 경우
+	if (btnType == 'DELETE') {
+		if(confirm("Are you sure you want to delete page setup?")) {
+			document.getElementById("descReSetting").value = "N";
+			f.action = "ims/issue/imeMenuIniCfgProcess.do";
+			jQuery("#load").show();
+			f.submit();
+		}
+		return;
+	}
+
+
+	// 긴급/중요이슈 BEGIN =========================================
+	var solReqDate = f.solReqDate;
+	var priorityCode = f.priorityCode;
+	var severityCode = f.severityCode;
+	var recogId = f.recogId;
+	var approveId = f.approveId;
+	var urgentFlag = true;
+
+	if (priorityCode.value == 'PR01' || severityCode.value == 'SV01') {
+		if (isNull(solReqDate.value)) {
+			alert("긴급/중요 건의 경우 해결완료 요청일을 반드시 입력해주세요.");
+			return;
+		}
+		if (isNull(approveId.value)) {
+			alert("긴급/중요 건의 경우 승인자를 반드시 입력해주세요.");
+			return;
+		}
+		alert("긴급/중요이슈는 별도의 관리가 필요한 프로세스입니다.\n" + "팀장 또는 PM의 승인후에 처리되며,\n"
+				+ "검토전에는 보통 이슈와 같은 프로세스로 진행됩니다.");
+		urgentFlag = true;
+	} else {
+		urgentFlag = false;
+	}
+	// 긴급이슈 END ===============================================
+
+	var isSystemManager = document.getElementById("isSystemManager").value;
+
+	var oldActivityId = f.oldActivityId.value;
+	if (isNull(f.title.value)) {
+		if (!errorMessage(f.title, "Please enter a subject.")) {
+			return;
+		}
+	}
+	
+	// version에 관한 체크 BEGIN=====================================
+	if (isNull(mainVersionCode)) {
+		if (!errorMessage(f.mainVersionCode, "Please select version.")) {
+			return;
+		}
+	}
+
+	if (f.subVersionCode != null && f.subVersionCode.style.display != 'none') {
+		if (isNull(subVersionCode)) {
+			if (!errorMessage(f.subVersionCode, "Please select minor version.")) {
+				return;
+			}
+		}
+	}
+	// ====================================================================
+
+	// Tibero(070), K-DB(082), UPDB(073) 인 경우 FixSet 필수 : UPData(103), ZetaData(078) 추가
+	if(f.productCode.value == "070" || f.productCode.value == "082" || f.productCode.value == "073"
+		|| f.productCode.value == "103" || f.productCode.value == "078") {
+		var fixSet = getComboBoxValue(f.fixSet);
+		if (isNull(fixSet)) {
+			if (!errorMessage(f.fixSet, "Please select a fixSet.")) {
+				return;
+			}
+		}
+	}
+	
+	// Product : Prosync(430), Category : Binary Request(request), Module : build(003) 일 경우 osId 필수
+	if(f.productCode.value == "430" && f.categoryCode.value == "request" && f.mainModuleCode.value == "003") {
+		var osId = getComboBoxValue(f.osId);
+		if (isNull(osId)) {
+			if (!errorMessage(f.osId, "Please select a operating system.")) {
+				return;
+			}
+		}
+	}
+	
+	//module check
+	var mainModuleCode = getComboBoxValue(f.mainModuleCode);
+	if (isNull(mainModuleCode)) {
+		if (!errorMessage(f.mainModuleCode, "Please select a module.")) {
+			return;
+		}
+	}
+	
+	// submodule 세팅
+	var subModuleCode = getComboBoxValue(f.subModuleCode);
+	if (isNull(subModuleCode)) {
+		f.moduleCode.value = mainModuleCode;
+	} else {
+		f.moduleCode.value = subModuleCode;
+	}
+	
+	if (f.subModuleCode != null && f.subModuleCode.style.display != 'none') {
+		if (isNull(subModuleCode)) {
+			if (!errorMessage(f.subModuleCode, "Please select subModule.")) {
+				return;
+			}
+		}
+	}
+
+	var priorityCode = getComboBoxValue(f.priorityCode);
+	if (isNull(priorityCode)) {
+		if (!errorMessage(f.priorityCode, "Please select the priority.")) {
+			return;
+		}
+	}
+
+	var severityCode = getComboBoxValue(f.severityCode);
+	if (isNull(severityCode)) {
+		if (!errorMessage(f.severityCode, "Please select the severity.")) {
+			return;
+		}
+	}
+	
+	// patch version에 관한 체크 BEGIN=====================================
+	if (!isNew && isNull(v_patchMainVersionCode.value)
+			&& v_patchSubVersionCode != null
+			&& v_patchSubVersionCode.style.display != 'none') {
+		if (isNull(v_patchSubVersionCode.value)) {
+			if (!errorMessage(f.patchSubVersionCode, "Please select minor patch version.")) {
+				return;
+			}
+		}
+	}
+	// patch version에 관한 체크 END ================================
+
+	if (isNull(f.projectCode.value)) {
+		alert("Please enter the project code.");
+		return;
+	}
+
+	if (isNull(f.categoryCode.value)) {
+		if (!errorMessage(f.categoryCode, "Please enter a category.")) {
+			return;
+		}
+	}
+	
+	if (f.categoryCode.value == "defect" || f.categoryCode.value == "patchFail") {
+		if (isNull(f.defectCode.value)) {
+			if (!errorMessage(f.defectCode, "Please enter the bug type.")) {
+				return;
+			}
+		}
+	}
+
+	// JEUS(020) 이슈 등록시 필수항목 체크 START
+	if(f.productCode.value == "020") {
+		if (isNull(f.productCode.value)) {
+			if (!errorMessage(f.productCode, "Please enter a product.")) {
+				return;
+			}
+		}
+		if (isNull(f.mainVersionCode.value)) {
+			if (!errorMessage(f.mainVersionCode, "Please enter a version.")) {
+				return;
+			}
+		}
+		if (isNull(f.buildNo.value)) {
+			if (!errorMessage(f.buildNo, "Please enter a build No.")) {
+				return;
+			}
+		}
+		if (isNull(f.patchNo.value)) {
+			if (!errorMessage(f.patchNo, "Please enter a patch No.")) {
+				return;
+			}
+		}
+		if (isNull(f.moduleCode.value)) {
+			if (!errorMessage(f.moduleCode, "Please enter a module.")) {
+				return;
+			}
+		}
+		if (isNull(f.projectCode.value)) {
+			if (!errorMessage(f.projectCode, "Please enter a project.")) {
+				return;
+			}
+		}
+		if (isNull(f.siteCode.value)) {
+			if (!errorMessage(f.siteCode, "Please enter a site.")) {
+				return;
+			}
+		}
+		if(f.categoryCode.value != "request"){		//Binary Request가 아닌 경우
+			if (isNull(f.databaseId.value)) {
+				if (!errorMessage(f.databaseId, "Please enter a database.")) {
+					return;
+				}
+			}
+			if (isNull(f.middlewareId.value)) {
+				if (!errorMessage(f.middlewareId, "Please enter a middleware.")) {
+					return;
+				}
+			}
+			if (isNull(f.osId.value)) {
+				if (!errorMessage(f.osId, "Please enter a Operation System.")) {
+					return;
+				}
+			}
+			if (isNull(f.databaseVersion.value)) {
+				if (!errorMessage(f.databaseVersion, "Please enter a databaseVersion.")) {
+					return;
+				}
+			}
+			if (isNull(f.jdk.value)) {
+				if (!errorMessage(f.jdk, "Please enter a jdk.")) {
+					return;
+				}
+			}
+		}
+	}
+	// JEUS 이슈 등록시 필수항목 체크 END
+
+	// Anylink 필수항목 추가
+	if(f.productCode.value == "050" && f.categoryCode.value != "request") {
+		if(isNull(f.databaseId.value)){
+			if (!errorMessage(f.databaseId, "Please select the Database.")) {
+				return;
+			}
+		}
+		if(isNull(f.osId.value)){
+			if (!errorMessage(f.osId, "Please select the Operating System.")) {
+				return;
+			}
+		}
+		if(isNull(f.databaseVersion.value)){
+			if (!errorMessage(f.databaseVersion, "Please enter the Database Version.")) {
+				return;
+			}
+		}
+	}
+
+	// 결함이 아니면 결함유형, Bug Number를 초기화한다.
+//	if (f.categoryCode.value != "defect") {
+	if (f.categoryCode.value == 'improve' || f.categoryCode.value == 'addition' || f.categoryCode.value == 'inquiry' || f.categoryCode.value == 'request') {
+		document.getElementById("defectCode").value = "";
+		document.getElementById("bugNo").value = "";
+	}
+
+	// 반려사유 체크
+	// var resoCode = document.getElementsByName("resolutionCode");
+	var resoCode = f.resolutionCode;
+	if (resoCode != null && resoCode != undefined) {
+		if (!isNull(f.oldActivityId.value)) {
+			var activityId = f.oldActivityId.value;
+			if (activityId == '7') {
+				var resolutionCode = getComboBoxValue(resoCode);
+				if (isNull(resolutionCode)) {
+					if (!errorMessage(resoCode,
+							"Please select the reason for rejection.")) {
+						return;
+					}
+				}
+			} else {
+				resoCode.selectedIndex = -1;
+			}
+		}
+	}
+
+	if (f.productCode.value == '180') {
+		if (isNull(f.site.value)) {
+			if (!errorMessage(f.site, "Please enter customer.")) {
+				return;
+			}
+		}
+	}
+
+	// 관련이슈체크박스 체크
+	var relatedIssues = f.relatedIssueIds;
+	if (!isNull(relatedIssues)) {
+		if (isNull(relatedIssues.length)) {
+			relatedIssues.checked = true;
+		} else {
+			for (var i = 0; i < relatedIssues.length; i++) {
+				relatedIssues[i].checked = true;
+			}
+		}
+	}
+	// 관심이슈유저 체크박스 체크
+	var checkedUsers = f.checkedUserIds;
+	if (!isNull(checkedUsers)) {
+		if (isNull(checkedUsers.length)) {
+			checkedUsers.checked = true;
+		} else {
+			for (var i = 0; i < checkedUsers.length; i++) {
+				checkedUsers[i].checked = true;
+			}
+		}
+	}
+
+	var btnType = document.getElementById("btnType").value;
+	// alert(btnType);
+	if (btnType == 'SAVE' || btnType == 'POPSAVE') {
+		f.action = "ims/issue/issueForm.do";
+		// }else if(btnType=='POPSAVE'){
+		// f.action = "tms/session/popup/popupIssueRegisterForm.do";
+	} else if (btnType == 'VIEW') {
+		// alert(btnType);
+		return;
+	}
+
+	var is32IE = document.getElementById("is32IE").value;
+	if (is32IE == 'Y') {
+		var issueId = document.getElementById("issueId").value;
+
+		if (issueId == 0 || (!isNull(issueId) && issueId > 39509)) {
+			//디자인 탭에서 처리(HTML, 미리보기에서 저장 버그)
+			f.twe.ActiveTab = 1;
+
+			var strMime = document.twe.MimeValue();
+			var strBody = document.twe.BodyValue();
+
+			f.mime_contents.value = strMime;
+			f.html_contents.value = strBody;
+			if(document.twe.TextValue() == ''){
+				alert("Please enter the issue description.");
+				document.twe.SetFocus();
+				return;
+			}
+			/* Tagfree Editor */
+		}
+	} else {
+		/* X-free Editor */
+		if (xfe.getTextValue() == '') {
+			alert("Please enter the issue description.");
+			return;
+		}
+		f.xcontents.value = xfe.getBodyValue();		// 실제contents 내용
+		/* X-free Editor */
+	}
+
+	if (isNew) {
+		if (confirm("Do you want to submit the issue?")) {
+			// if(!urgentFlage) recogId.value =""; // 긴급이 아니면 긴급결재자를 null로 변경한다.
+			// return true;
+			if(f.productCode.value == "020" && f.categoryCode.value != "request") {
+				if(confirm("이슈 등록시 빠른 원인 분석과 대응을 위해 해당 이슈에 대한 JEUS config 파일이나 로그 파일 및 thread dump 파일들을 올려주십시요. "))
+					;
+				else return;
+			}
+		} else {
+			return;
+		}
+	} else {
+		if (confirm("Would you like to save issue information?")) {
+			// if(!urgentFlage) recogId.value =""; // 긴급이 아니면 긴급결재자를 null로 변경한다.
+			// return true;
+		} else {
+			return;
+		}
+	}
+
+	jQuery("#load").show();
+	f.submit();
+}
+
+// issueForm(이슈수정)에서 category수정시 화면 reload
+function setCategoryRefresh(issueId, cateCode) {
+	var f = document.forms[0];
+	var prodCode = document.getElementById("productCode").value;
+	var viewMode = document.getElementById("viewMode").value;
+	var popYN = document.getElementById("popYN").value;
+
+	if (isNull(cateCode)) {
+		if(browserType == "Mac"){
+			alertTimeout("Please select a category.");
+		}else{
+			alert("Please select a category.");
+		}
+		return false;
+	}
+
+	if (isNull(prodCode)) {
+		if(browserType == "Mac"){
+			alertTimeout("Please select a product.");
+		}else{
+			alert("Please select a product.");
+		}
+		return false;
+	}
+
+	if(cateCode == 'improve' || cateCode == 'addition' || cateCode == 'inquiry' || cateCode == 'request'){
+		document.getElementById("defectCode").value = "";
+	}
+
+	// 버전코드 세팅
+	var subVersion = f.subVersionCode;
+	var subVersionCode = (subVersion == null)
+			? ""
+			: getComboBoxValue(f.subVersionCode);
+	var mainVersionCode = f.mainVersionCode.value;
+	if (isNull(subVersionCode)) {
+		f.versionCode.value = mainVersionCode;
+	} else {
+		f.versionCode.value = subVersionCode;
+	}
+
+	if (!isNull(f.patchMainVersionCode)) {
+		var patchMainVersionCode = getComboBoxValue(f.patchMainVersionCode);
+		var patchSubVersionCode = getComboBoxValue(f.patchSubVersionCode);
+		if (!isNull(patchSubVersionCode)) {
+			f.patchVersionCode.value = patchSubVersionCode;
+		} else {
+			if (!isNull(patchMainVersionCode)) {
+				f.patchVersionCode.value = patchMainVersionCode;
+			} else {
+				f.patchVersionCode.value = "";
+			}
+		}
+	}
+
+	// description setting
+	var is32IE = document.getElementById("is32IE").value;
+	if (is32IE == 'Y') {
+		if (issueId == 0 || (!isNull(issueId) && issueId > 39509)) {
+			/* Tagfree Editor */
+			var strMime = document.twe.MimeValue();
+			var strBody = document.twe.BodyValue();
+
+			f.mime_contents.value = strMime;
+			f.html_contents.value = strBody;
+			/* Tagfree Editor */
+		}
+	}else {
+		/* X-free Editor */
+		f.xcontents.value = xfe.getBodyValue();		// 실제contents 내용
+		/* X-free Editor */
+	}
+
+	document.getElementById("refreshCategory").value = "Y";
+	document.getElementById("refreshProduct").value = "N";
+
+	var descReSetting = document.getElementById("descReSetting");
+
+	//edit인 경우 description 유지
+	if(issueId > 0){
+		if(document.getElementById("issuePatchFail").value == "Y"){
+			descReSetting.value = "Y";
+		} else {
+			descReSetting.value = "N";
+		}
+		
+		strIssueId = "issueId=" + issueId + "&";
+		f.action = "ims/issue/issueForm.do?descReSetting=" + descReSetting.value
+				+ "&" + strIssueId + "refreshCategory=Y&refreshProduct=N&viewMode="
+				+ viewMode + "&popYN=" + popYN;
+		jQuery("#load").show();
+		f.submit();
+	}else{
+		//ios confirm 오류 처리
+		var ua = navigator.userAgent;
+		if(ua.indexOf("Mac") > 0) {
+			setTimeout(function() {
+				if (confirm("Do you want to change description for the issue?")) {
+					descReSetting.value = "Y";
+				} else {
+					descReSetting.value = "N";
+				}
+				var strIssueId = "";
+				if (issueId > 0){
+					strIssueId = "issueId=" + issueId + "&";
+				}
+				f.action = "ims/issue/issueForm.do?descReSetting=" + descReSetting.value
+						+ "&" + strIssueId + "refreshCategory=Y&refreshProduct=N&viewMode="
+						+ viewMode + "&popYN=" + popYN;
+				jQuery("#load").show();
+				f.submit();
+			}, 0);
+		}else{
+			if (confirm("Do you want to change description for the issue?")) {
+				descReSetting.value = "Y";
+			} else {
+				descReSetting.value = "N";
+			}
+			var strIssueId = "";
+			if (issueId > 0){
+				strIssueId = "issueId=" + issueId + "&";
+			}
+			f.action = "ims/issue/issueForm.do?descReSetting=" + descReSetting.value
+					+ "&" + strIssueId + "refreshCategory=Y&refreshProduct=N&viewMode="
+					+ viewMode + "&popYN=" + popYN;
+			jQuery("#load").show();
+			f.submit();
+		}
+	}
+
+}
+
+// var strIssueId ="";
+// var strProduct ="";
+// var strCategory = "";
+
+// if(issueId>0) strIssueId = "issueId=" + issueId +"&";
+// if(!isNull(prodCode)) strProduct = "productCode="+ prodCode +"&";
+// if(!isNull(cateCode)) strCategory = "categoryCode="+ cateCode +"&";
+
+// location.href = context + "/ims/issue/issueForm.do?"+ strIssueId + strProduct
+// + strCategory +"refreshCategory=Y&popYN="+popYN;
+
+// issueForm(이슈수정)에서 product수정시 화면 reload
+function setProductRefresh(issueId, prodCode) {
+	var cateCode = document.getElementById("categoryCode").value;
+	var patchVersionCode = document.getElementById("patchVersionCode").value;
+
+	if (issueId != 0 && !isNull(patchVersionCode)) {
+		if(browserType == "Mac"){
+			alertTimeout("There is a patch version in this issue\n ,so you can't change a product.\n Please ask this issue of the IMS system manager.");
+		}else{
+			alert("There is a patch version in this issue\n ,so you can't change a product.\n Please ask this issue of the IMS system manager.");
+		}
+		return false;
+	}
+	if (isNull(cateCode)) {
+		if(browserType == "Mac"){
+			alertTimeout("Please select a category.");
+		}else{
+			alert("Please select a category.");
+		}
+		return false;
+	}
+	if (isNull(prodCode)) {
+		if(browserType == "Mac"){
+			alertTimeout("Please select a product.");
+		}else{
+			alert("Please select a product.");
+		}
+		return false;
+	}
+
+	document.getElementById("mainVersionCode").value = "";
+	document.getElementById("subVersionCode").value = "";
+	document.getElementById("moduleCode").value = "";
+	document.getElementById("versionCode").value = "";
+	document.getElementById("refreshCategory").value = "N";
+	document.getElementById("refreshProduct").value = "Y";
+
+	var f = document.forms[0];
+	// description setting
+	var is32IE = document.getElementById("is32IE").value;
+	if (is32IE == 'Y') {
+		var issueId = document.getElementById("issueId").value;
+
+		if (issueId == 0 || (!isNull(issueId) && issueId > 39509)) {
+			/* Tagfree Editor */
+			var strMime = document.twe.MimeValue();
+			var strBody = document.twe.BodyValue();
+
+			f.mime_contents.value = strMime;
+			f.html_contents.value = strBody;
+			/* Tagfree Editor */
+		}
+	}else {
+		/* X-free Editor */
+		f.xcontents.value = xfe.getBodyValue();		// 실제contents 내용
+		/* X-free Editor */
+	}
+
+	var viewMode = document.getElementById("viewMode").value;
+	var popYN = document.getElementById("popYN").value;
+	var strIssueId = "";
+	var strProduct = "";
+	var strCategory = "";
+
+	if (issueId > 0)
+		strIssueId = "issueId=" + issueId + "&";
+	// if(!isNull(prodCode)) strProduct = "productCode="+ prodCode +"&";
+	// if(!isNull(cateCode)) strCategory = "categoryCode="+ cateCode +"&";
+
+	document.getElementById("refreshCategory").value = "N";
+	document.getElementById("refreshProduct").value = "Y";
+
+	var descReSetting = document.getElementById("descReSetting");
+
+	//Edit시 description 유지
+	if(issueId > 0){
+		descReSetting.value = "N";
+		f.action = "ims/issue/issueForm.do?descReSetting=" + descReSetting.value
+			+ "&" + strIssueId + "refreshProduct=Y&refreshCategory=N&viewMode="
+			+ viewMode + "&popYN=" + popYN;
+		jQuery("#load").show();
+		f.submit();
+	}else{
+		//ios confirm 오류 처리
+		var ua = navigator.userAgent;
+		if(ua.indexOf("Mac") > 0) {
+			setTimeout(function() {
+				if (confirm("Do you want to change description for the issue?")) {
+					descReSetting.value = "Y";
+				} else {
+					descReSetting.value = "N";
+				}
+
+				f.action = "ims/issue/issueForm.do?descReSetting=" + descReSetting.value
+				+ "&" + strIssueId + "refreshProduct=Y&refreshCategory=N&viewMode="
+				+ viewMode + "&popYN=" + popYN;
+				jQuery("#load").show();
+				f.submit();
+			}, 0);
+		}else{
+			if (confirm("Do you want to change description for the issue?")) {
+				descReSetting.value = "Y";
+			} else {
+				descReSetting.value = "N";
+			}
+
+			f.action = "ims/issue/issueForm.do?descReSetting=" + descReSetting.value
+			+ "&" + strIssueId + "refreshProduct=Y&refreshCategory=N&viewMode="
+			+ viewMode + "&popYN=" + popYN;
+			jQuery("#load").show();
+			f.submit();
+		}
+	}
+}
+
+// setManagerType
+function setManagerType(module) {
+	f.manType.value = module[0].MGR_TYPE;
+}
+
+// issueList 에서 activity조건을 close나 reject로 바꾸면 checkBox가 체크되고
+// 다른 상태를 선택하면 checkBox가 체크해제되도록 세팅한다.
+function setListActivityChg() {
+	var f = document.forms[0];
+}
+
+// isDuplicateEmail
+function isDuplicateEmail(email, dest) {
+	var opt = null;
+	for (var i = 0; i < dest.length; i++) {
+		opt = dest.options[i];
+		if (email == opt.value) {
+			return true;
+		}
+	}
+	return false;
+}
+
+// goAddIssueForm
+function goAddIssueForm(f) {
+	if (isNull(getRadioBoxValue(f.productCode))) {
+		if (!errorMessage(document.getElementById("productCode"),"Please select a product.")) {
+			return false;
+		}
+	}
+	if (isNull(getRadioBoxValue(f.categoryCode))) {
+		if (!errorMessage(document.getElementById("categoryCode"),"Please select a category.")) {
+			return false;
+		}
+	}
+	jQuery("#load").show();
+	return true;
+}
+
+// goIssueListFromReg
+function goIssueListFromReg(menuCode) {
+	// alert("IMS 이슈리스트");
+	if (isNull(menuCode)){
+		menuCode = "";
+	}
+	jQuery("#load").show();
+	location.href = context + "/ims/issue/issueList.do?menuCode=" + menuCode;
+}
+
+function goIssueList(menuCode) {
+	if (isNull(menuCode))
+		menuCode = "";
+	location.href = context + "/ims/issue/issueList.do?menuCode=" + menuCode;
+}
+
+function goImsIssueList(projectId, sessionId, suitId, testCaseId) {
+	var url = context + "/tms/session/popup/popupIssueList.do?projectId="
+			+ projectId + "&sessionId=" + sessionId + "&suitId=" + suitId
+			+ "&testCaseId=" + testCaseId;
+	location.href = url;
+}
+
+var deleteAttachId = null;
+function deleteIssueAttach(issueId, attachId) {
+	if (confirm("Are you sure you want to delete the selected file?")) {
+		deleteAttachId = attachId;
+		AttachmentDwr.deleteIssueAttach(issueId, attachId, deleteIssueAttachAfterProcess);
+	}
+}
+
+function deleteIssueAttachAfterProcess(message) {
+	if (message == 1) {
+//		var tb = $("attachedTable");
+		var tb = document.getElementById("attachedTable");
+		var rows = tb.rows;
+		var idx = null;
+		for (var i = 0; i < rows.length; i++) {
+			if (rows[i].attachId == deleteAttachId) {
+				idx = i;
+			}
+		}
+		tb.deleteRow(idx);
+	} else {
+		alert("Oops! An error occurred while deleting the file.");
+	}
+}
+
+function setTab(idx) {
+	var cnt = 8;
+	var tdObj = null;
+	var divObj = null;
+	var tabUp = null;
+	var tabDown = null;
+	for (var i = 1; i < cnt; i++) {
+		tdObj = document.getElementById("tab_" + i);
+		divObj = document.getElementById("problem_" + i);
+		tabUp = document.getElementById("tabUp_" + i);
+		tabDown = document.getElementById("tabDown_" + i);
+		if (tdObj && divObj) {
+			if (i == idx) {
+				tdObj.style.background = 'url(images/ims/tab_bg2.gif)';
+				divObj.style.display = "inline";
+				tabUp.src = context + "/images/ims/tab_img3.gif";
+				tabDown.src = context + "/images/ims/tab_img4.gif";
+			} else {
+				tdObj.style.background = 'url(images/ims/tab_bg1.gif)';
+				divObj.style.display = "none";
+				tabUp.src = context + "/images/ims/tab_img1.gif";
+				tabDown.src = context + "/images/ims/tab_img2.gif";
+			}
+		}
+	}
+}
+
+function getIssueFileHTML(idx) {
+	return "<input type=\"file\" name=\"uploadFiles["+ idx +"]\" class=\"input uploadFilesClass\" style=\"width: 520px; height:25px; \">";
+}
+
+function addIssueAttachFile() {
+	var tableObj = document.getElementById("attachTable");
+	var tRows = tableObj.rows;
+	var tLength = tRows.length;
+	if (tLength >= 10) {
+		alert("Sorry! Cannot attach more than 10 files.");
+		return;
+	}
+	var newRow = tableObj.insertRow(tLength);
+	var newCell = newRow.insertCell(0);
+	newCell.className = "data";
+	newCell.style.cssText = "padding: 0 3px;";
+	newCell.innerHTML = getIssueFileHTML(tLength);
+}
+
+function popRelatedIssueList(productCode, issueId) {
+	//Parent 체크
+	var relationIssueType = jQuery(":input:radio[name=relationIssueType]:checked").val();
+	if(relationIssueType == 'Parent'){
+		var flag = false;
+		jQuery.each(jQuery('input[name="rel_relationIssueType"]'), function(index, item) {
+			if(item.value == 'Parent'){
+				flag = true;
+				alert("Parent has already been added.");
+				return;
+			}
+		});
+		
+		if(flag){ return; }
+	}
+	
+	var width = 1150;
+	var height = 780;
+	var top = getY(height);
+	var left = getX(width);
+	var property = "top=" + top + ",left=" + left + ",width=" + width + ",height=" + height + ",scrollbars=1,resizable=1";
+	var url = context + "/ims/issue/popupIssueList.do?productCode=" + productCode + "&relationIssueType=" + relationIssueType + "&relIssueId=" + issueId;
+	var ow = window.open(url, "popupRelatedIssueList", property);
+}
+
+function popChkUserList() {
+	var width = 800;
+	var height = 630;
+	var top = getY(height);
+	var left = getX(width);
+	var property = "top=" + top + ",left=" + left + ",width=" + width
+			+ ",height=" + height + ",scrollbars=1,resize=1,status=yes";
+	var url = context + "/ims/user/popupUserList.do?multi=Y";
+	var ow = window.open(url, "popupChkUserList", property);
+}
+
+function deleteCheckedUser() {
+	var tb = document.getElementById("CheckedUserTable");
+	var rows = tb.rows;
+	var ccInfo = getAllCheckboxValue('checkedUserIds');
+	var token = ccInfo.split('|-|');
+
+	for (i = 0; i < token.length; i++) {
+		for (j = 0; j < rows.length; j++) {
+			row = rows[j];
+			// alert("|" + row.cells[0].issueId + "|" + ", |" + token[i] + "|");
+			if (row.cells[0].id == token[i]) {
+				tb.deleteRow(j);
+			}
+		}
+	}
+}
+
+function deleteRelatedIssue() {
+	var relationIssueType = jQuery(":input:radio[name=relationIssueType]:checked").val();
+	console.log(relationIssueType);
+	
+	var tb = document.getElementById("RelatedIssueTable");
+	var rows = tb.rows;
+	var ccInfo = getAllCheckboxValue('relatedIssueIds');
+	var token = ccInfo.split('|-|');
+	if(token != ''){
+		for (i = 0; i < token.length; i++) {
+			for (j = 0; j < rows.length; j++) {
+				row = rows[j];
+				//console.log(row.cells[0].id + ", " + token[i]);
+				if (row.cells[0].id == token[i]) {
+					tb.deleteRow(j);
+				}
+			}
+		}
+	}
+	
+	if(jQuery("input[name=rel_relationIssueType]:input[value=" + relationIssueType + "]").length == 0){
+		console.log("true" + jQuery("input[name=rel_relationIssueType]:input[value=" + relationIssueType + "]").length);
+		jQuery("input:radio[name=relationIssueType]").attr("disabled", false);
+	}else{
+		console.log(jQuery("input[name=rel_relationIssueType]:input[value=" + relationIssueType + "]").length);
+	}
+}
+
+function setSubVersion(mainVersionCode, systemCode, userId) {
+	var productCode = $("productCode").value;
+	ProductDwr.findRegSubVersions(productCode, systemCode, userId, mainVersionCode, listMainVersionProcess);
+}
+
+function listMainVersionProcess(subVersions) {
+	var versionCombo = $("subVersionCode");
+	var f = document.forms[0];
+
+	DWRUtil.removeAllOptions(versionCombo);
+	DWRUtil.addOptions("subVersionCode", new Array({
+						versionCode : "",
+						versionName : "::: select :::"
+					}), "versionCode", "versionName");
+	DWRUtil.addOptions(versionCombo, subVersions, "versionCode", "versionName");
+
+	if (!isNull(subVersions) && subVersions.length > 0) {
+		versionCombo.style.display = "";
+		f.sversionYN.value = "Y"
+	} else {
+		versionCombo.style.display = "none";
+		f.sversionYN.value = "N"
+	}
+}
+
+function setPatchSubVersion(mainVersionCode, systemCode, userId) {
+	//patchVersionCode 초기화
+	jQuery("#patchVersionCode").val('');
+	var productCode = $("productCode").value;
+	ProductDwr.findSearchSubVersions(productCode, systemCode, userId, mainVersionCode, listPatchMainVersionProcess);
+}
+
+function listPatchMainVersionProcess(subVersions) {
+	var versionCombo = $("patchSubVersionCode");
+	DWRUtil.removeAllOptions(versionCombo);
+	DWRUtil.addOptions("patchSubVersionCode", new Array({
+						versionCode : "",
+						versionName : "::: select :::"
+					}), "versionCode", "versionName");
+	DWRUtil.addOptions(versionCombo, subVersions, "versionCode", "versionName");
+
+	if (!isNull(subVersions) && subVersions.length > 0) {
+		versionCombo.style.display = "";
+	} else {
+		versionCombo.style.display = "none";
+	}
+}
+
+function allCheck(flag, id) {
+	// alert("issue");
+	var checkBox = document.getElementsByName(id);
+
+	if (isNull(checkBox)) {
+		return;
+	}
+
+	var cbLength = checkBox.length;
+
+	if (isNull(cbLength)) {
+		checkBox.checked = flag;
+	} else {
+		for (var i = 0; i < cbLength; i++) {
+			checkBox[i].checked = flag;
+		}
+	}
+
+	checkFlag = !flag;
+}
+
+function getAllCheckboxValue(id) {
+	var checkBox = document.getElementsByName(id);
+	var cnt = 0;
+	var checkedValue = '';
+	for (var i = 0; i < checkBox.length; i++) {
+		if ((checkBox[i].checked)) {
+			checkedValue += checkBox[i].value + '|-|';
+		}
+	}
+	return checkedValue.substring(0, checkedValue.lastIndexOf('|-|'));
+}
+
+function setDisplayApprove(curControl, priority, severity) {
+	var prioVal = document.getElementById(priority).value;
+	var seveVal = document.getElementById(severity).value;
+	var viewMode = jQuery("#viewMode").val();
+
+	if (viewMode != "view" && (prioVal == "PR01" || seveVal == "SV01")) {
+		document.getElementById("trApproveId").style.display = "";
+	} else {
+		document.getElementById("trApproveId").style.display = "none";
+	}
+}
+
+
+function findSubModuleList(){
+	var productCode = jQuery("#productCode").val();
+	var parentModuleCode = jQuery("#mainModuleCode").val();
+	
+	if(!isNull(productCode) && !isNull(parentModuleCode)){
+		jQuery.ajax({
+			url : "ims/module/findSubModuleList.do",
+			dataType: "json",
+			type: "POST",
+			async: false,
+			data : {	
+				productCode:productCode,
+				parentModuleCode:parentModuleCode
+				
+			},
+			success: function(data, textStatus, jqXHR) {
+				jQuery("#subModuleCode option").remove();
+				jQuery("#subModuleCode").append('<option value="">--- Select subModule ---</option>');
+				if(data.length > 0){
+					jQuery.each(data, function(index, item) {
+						var newRow = "<option value='" + item.moduleCode +"'>" + item.moduleName +"</option>";
+						jQuery("#subModuleCode").append(newRow);
+					});
+					jQuery("#subModuleCode").show();
+				}else{
+					jQuery("#subModuleCode").hide();
+					
+					//템플릿 적용을 위해 호출
+					jQuery("#moduleCode").val(parentModuleCode);
+					setCategoryRefresh(jQuery("#issueId").val(), jQuery("#categoryCode").val());
+				}
+			},
+			error: function (jqXHR, textStatus, errorThrown)  {
+				statusCd = "["+jqXHR.status+"][" + textStatus + "][" + errorThrown + "]";
+				alert(statusCd);
+			}
+		});
+	}
+}
+
+function subModuleChange(){
+	var productCode = jQuery("#productCode").val();
+	var parentModuleCode = jQuery("#mainModuleCode").val();
+	var subModuleCode = jQuery("#subModuleCode").val();
+	
+	if(subModuleCode != ''){
+		//템플릿 적용을 위해 호출
+		jQuery("#moduleCode").val(subModuleCode);
+		setCategoryRefresh(jQuery("#issueId").val(), jQuery("#categoryCode").val());
+	}
+}
+
+/**
+ * Templates
+ */
+function insertUserTemplate() {
+	var viewMode = jQuery("#viewMode").val();
+	jQuery("#load").show();
+	location.href = context + "/ims/issue/issueForm.do?viewMode=" + viewMode;
+}
+
+function deleteUserTemplate() {
+	var f = document.forms[0];
+	if(f.templateNo.selectedIndex < 0) {
+		alert("Please select a template to delete.");
+		setBtnType('');
+		console.log("aa");
+	} else {
+//		var filterNo = getComboBoxValue(f.filters);
+		if(confirm("Are you sure you want to delete the selected template?")) {
+//			f.filterNo.value = filterNo;
+			f.method = "post";
+			f.action = "ims/issue/imeMenuIniCfgProcess.do";
+			jQuery("#load").show();
+			f.submit();
+		}
+	}
+}
+
+function setTemplatePage(isNew) {
+	var f = document.forms[0];
+	if(f.templateNo.selectedIndex < 0) {
+		alert("Please select a template to set.");
+		return;
+	} else {
+		chgCurrMode(isNew);
+	}
+}
+
+function viewUserTemplate(templateNo) {
+	jQuery("#load").show();
+	var viewMode = jQuery("#viewMode").val();
+	location.href = context + "/ims/issue/issueForm.do?templateNo=" + templateNo + "&viewMode=" + viewMode;
+}
+
+function fn_checkFileSize(obj) {
+	const MAXSIZE = 5 * 1024; // 5GB = 5120MB
+
+	if (obj && obj.files && obj.files.length > 0) {
+		const objSize = obj.files[0].size / (1024 * 1024); // MB 단위
+
+		if (objSize > MAXSIZE) {
+			alert("File size too large.\n(current file size: " + Math.round(objSize) + "MB)");
+			return false;
+		}
+	}
+	return true;
+}

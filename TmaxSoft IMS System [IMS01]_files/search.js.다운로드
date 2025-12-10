@@ -1,0 +1,1592 @@
+var f;
+
+function fn_forwViewIssue(issueId, ftype) {
+	var fType = document.getElementsByName(ftype);
+	if (fType[0].checked) {
+		popupIssueView(issueId);
+	} else {
+		viewIssue(issueId);
+	}
+}
+
+function fn_conditionSave() {
+	var myform = document.forms[0];
+	if (!getSearchCondVali(myform)) { 
+		return;
+	}
+	myform.method = "get";
+	myform.action = "ims/issue/imeMenuIniCfgProcess.do";
+	jQuery("#load").show();
+	myform.submit();
+}
+
+function saveExcelSumm() {
+	/*
+	var cdtCheck = chkCdtAtLeast();
+	if (!cdtCheck) {
+		alert("Please enter at least one condition.");
+		return;
+	}
+	var reportType = document.getElementById("reportType").value;
+	var reportLink = document.getElementById("reportLink").value;
+	if (isNull(reportType)) {
+		alert("Please select report type.");
+		return;
+	}
+	var myform = document.forms[0];
+	myform.method = "get";
+	myform.action = context + reportLink;
+	myform.submit();
+	*/
+	
+	var cdtCheck = chkCdtAtLeast();
+	if (!cdtCheck) {
+		alert("Please enter at least one condition.");
+		return;
+	}
+	var reportType = document.getElementById("reportType").value;
+	var reportLink = document.getElementById("reportLink").value;
+	
+	if (isNull(reportType)) {
+		alert("Please select report type.");
+		return;
+	}
+	
+	var myform = document.forms[0];
+	myform.method = "get";
+	myform.action = context + reportLink;
+	ajaxExcelDown(myform);
+	
+	// return false;
+}
+
+
+function setFormAction(f, searchType) {
+	if (searchType == "1") {
+		f.action = context + "/ims/issue/issueSearchList.do";
+	} else if (searchType == "2") {
+		f.action = context + "/ims/issue/issueByModuleList.do";
+	} else if (searchType == "3") {
+		f.action = context + "/ims/issue/rejectSumm.do";
+	} else if (searchType == "4") {
+		f.action = context + "/ims/issue/defectReasonSumm.do";
+	} else if (searchType == "5") {
+		f.action = context + "/ims/issue/defectSumm.do";
+	} else if (searchType == "6") {
+		f.action = context + "/ims/issue/techSupportSumm.do";
+	} else if (searchType == "7") {
+		f.action = context + "/ims/issue/dealDaysList.do";
+	} else if (searchType == "8") {
+		f.action = context + "/ims/issue/issueByCategoryList.do";
+	} else if (searchType == "9") {
+		f.action = context + "/ims/issue/delayedIssueList.do";
+	} else if (searchType == "10") {
+		f.action = context + "/ims/issue/searchSchedule.do";
+	} else if (searchType == "11") {
+		f.action = context + "/ims/issue/filteredIssueList.do";
+	} else if (searchType == "12") {
+		f.action = context + "/ims/knowledge/knowledgeList.do";
+	} else if (searchType == "13") {
+		f.action = context + "/ims/issue/issueListChk.do";
+	} else if (searchType == "14") {
+		f.action = context + "/ims/patch/patchSearchList.do";
+	}
+}
+
+function goIssueSearch(f, searchType) {
+	if (!getSearchValidation(f)) {
+		return;
+	} else if (f.actionType.value == 'search') {
+		// var searchType = f.searchType.value;
+		setFormAction(f, searchType);
+		jQuery("#load").show();
+		f.submit();
+	}
+}
+
+function searchAllClear() {
+	clearSearchProdComboBox();
+
+	var lists = document.getElementsByTagName("select");
+
+	// select box를 모두 초기화한다.
+	for (var i = 0; i < lists.length; i++) {
+		clearMutipleComboBox(lists[i].name);
+	}
+
+	var listType = document.getElementsByName("listType");
+	var sortType = document.getElementsByName("sortType");
+
+	var regStartDate = document.getElementById("regStartDate");
+	var regEndDate = document.getElementById("regEndDate");
+	//var regBeforeDate = document.getElementById("regBeforeDate");
+	//var regAfterDate = document.getElementById("regAfterDate");
+
+	var modStartDate = document.getElementById("modStartDate");
+	var modEndDate = document.getElementById("modEndDate");
+	//var modBeforeDate = document.getElementById("modBeforeDate");
+	//var modAfterDate = document.getElementById("modAfterDate");
+
+	var closedStartDate = document.getElementById("closedStartDate");
+	var closedEndDate = document.getElementById("closedEndDate");
+	//var closedBeforeDate = document.getElementById("closedBeforeDate");
+	//var closedAfterDate = document.getElementById("closedAfterDate");
+
+	var rndPatchStartDate = document.getElementById("rndPatchStartDate");
+	var rndPatchEndDate = document.getElementById("rndPatchEndDate");
+	//var rndPatchBeforeDate = document.getElementById("rndPatchBeforeDate");
+	//var rndPatchAfterDate = document.getElementById("rndPatchAfterDate");
+
+	var qaTestEndStartDate = document.getElementById("qaTestEndStartDate");
+	var qaTestEndEndDate = document.getElementById("qaTestEndEndDate");
+	//var qaTestEndBeforeDate = document.getElementById("qaTestEndBeforeDate");
+	//var qaTestEndAfterDate = document.getElementById("qaTestEndAfterDate");
+
+	var siteApplyStartDate = document.getElementById("siteApplyStartDate");
+	var siteApplyEndDate = document.getElementById("siteApplyEndDate");
+	//var siteApplyBeforeDate = document.getElementById("siteApplyBeforeDate");
+	//var siteApplyAfterDate = document.getElementById("siteApplyAfterDate");
+
+	var keyword = document.getElementById("keyword");
+	var qaComment = document.getElementById("qaComment");
+	var taggingWord = document.getElementById("taggingWord");
+	var issueId = document.getElementById("issueId");
+	var bugNo = document.getElementById("bugNo");
+	var registerId = document.getElementById("registerId");
+	var registerName = document.getElementById("registerName");
+	var ownerId = document.getElementById("ownerId");
+	var ownerName = document.getElementById("ownerName");
+	var managerId = document.getElementById("managerId");
+	var managerName = document.getElementById("managerName");
+	var projectCode = document.getElementById("projectCode");
+	var projectName = document.getElementById("projectName");
+	var site = document.getElementById("site");
+	var siteName = document.getElementById("siteName");
+
+	if (sortType != null && sortType[0] != null)
+		sortType[0].checked = "true";
+
+	listType[0].value = "1";
+
+	regStartDate.value = "";
+	regEndDate.value = "";
+	//regBeforeDate.value = "";
+	//regAfterDate.value = "";
+
+	modStartDate.value = "";
+	modEndDate.value = "";
+	//modBeforeDate.value = "";
+	//modAfterDate.value = "";
+
+	closedStartDate.value = "";
+	closedEndDate.value = "";
+	//closedBeforeDate.value = "";
+	//closedAfterDate.value = "";
+
+	if (rndPatchStartDate) {
+		rndPatchStartDate.value = "";
+	}
+	if (rndPatchStartDate) {
+		rndPatchEndDate.value = "";
+	}
+	/*
+	if (rndPatchBeforeDate) {
+		rndPatchBeforeDate.value = "";
+	}
+	if (rndPatchAfterDate) {
+		rndPatchAfterDate.value = "";
+	}
+	*/
+
+	if (qaTestEndStartDate) {
+		qaTestEndStartDate.value = "";
+	}
+	if (qaTestEndEndDate) {
+		qaTestEndEndDate.value = "";
+	}
+	/*
+	if (qaTestEndBeforeDate) {
+		qaTestEndBeforeDate.value = "";
+	}
+	if (qaTestEndAfterDate) {
+		qaTestEndAfterDate.value = "";
+	}
+	*/
+
+	if (siteApplyStartDate) {
+		siteApplyStartDate.value = "";
+	}
+	if (siteApplyEndDate) {
+		siteApplyEndDate.value = "";
+	}
+	/*
+	if (siteApplyBeforeDate) {
+		siteApplyBeforeDate.value = "";
+	}
+	if (siteApplyAfterDate) {
+		siteApplyAfterDate.value = "";
+	}
+	*/
+	keyword.value = "";
+	if (qaComment) {
+		qaComment.value = "";
+	}
+	if (taggingWord) {
+		taggingWord.value = "";
+	}
+	issueId.value = "";
+	bugNo.value = "";
+	if(registerId) {
+		registerId.value = "";
+		registerName.value = "";
+	}
+	if(ownerId) {
+		ownerId.value = "";
+		ownerName.value = "";
+	}
+	if(ownerId) {
+		managerId.value = "";
+		managerName.value = "";
+	}
+	projectCode.value = "";
+	projectName.value = "";
+	site.value = "";
+	siteName.value = "";
+
+	if(document.getElementById("registers")){
+		jQuery("#registers").tokenInput("clear");
+		jQuery("#owners").tokenInput("clear");
+		jQuery("#managers").tokenInput("clear");
+	}
+}
+
+function chkCdtAtLeast() {
+	var returnVal = false;
+	var productCodes = document.getElementsByName("productCodes");
+	var modules = document.getElementsByName("modules");
+	var versions = document.getElementsByName("versions");
+	var patchVersions = document.getElementsByName("patchVersions");
+	var categoryCodes = document.getElementsByName("categoryCodes");
+	var activities = document.getElementsByName("activities");
+	var priorities = document.getElementsByName("priorities");
+	var severities = document.getElementsByName("severities");
+	var defects = document.getElementsByName("defects");
+	var listType = document.getElementsByName("listType");
+
+	var resolutions = document.getElementsByName("resolutions");
+	var defects = document.getElementsByName("defects");
+	var deals = document.getElementsByName("deals");
+	var inquiries = document.getElementsByName("inquiries");
+	var preventions = document.getElementsByName("preventions");
+	var closePs	= document.getElementsByName("closePs");
+	var defReasons = document.getElementsByName("defReasons");
+
+	var regStartDate = document.getElementById("regStartDate");
+	var regEndDate = document.getElementById("regEndDate");
+	//var regBeforeDate = document.getElementById("regBeforeDate");
+	//var regAfterDate = document.getElementById("regAfterDate");
+
+	var modStartDate = document.getElementById("modStartDate");
+	var modEndDate = document.getElementById("modEndDate");
+	//var modBeforeDate = document.getElementById("modBeforeDate");
+	//var modAfterDate = document.getElementById("modAfterDate");
+
+	var closedStartDate = document.getElementById("closedStartDate");
+	var closedEndDate = document.getElementById("closedEndDate");
+	//var closedBeforeDate = document.getElementById("closedBeforeDate");
+	//var closedAfterDate = document.getElementById("closedAfterDate");
+
+	var rndPatchStartDate = document.getElementById("rndPatchStartDate");
+	var rndPatchEndDate = document.getElementById("rndPatchEndDate");
+	//var rndPatchBeforeDate = document.getElementById("rndPatchBeforeDate");
+	//var rndPatchAfterDate = document.getElementById("rndPatchAfterDate");
+
+	var qaTestEndStartDate = document.getElementById("qaTestEndStartDate");
+	var qaTestEndEndDate = document.getElementById("qaTestEndEndDate");
+	//var qaTestEndBeforeDate = document.getElementById("qaTestEndBeforeDate");
+	//var qaTestEndAfterDate = document.getElementById("qaTestEndAfterDate");
+
+	var siteApplyStartDate = document.getElementById("siteApplyStartDate");
+	var siteApplyEndDate = document.getElementById("siteApplyEndDate");
+	//var siteApplyBeforeDate = document.getElementById("siteApplyBeforeDate");
+	//var siteApplyAfterDate = document.getElementById("siteApplyAfterDate");
+
+	var keyword = document.getElementById("keyword");
+	var qaComment = document.getElementById("qaComment");
+	var taggingWord = document.getElementById("taggingWord");
+	var issueId = document.getElementById("issueId");
+	var bugNo = document.getElementById("bugNo");
+	var registerId = document.getElementById("registerId");
+	var ownerId = document.getElementById("ownerId");
+	var managerId = document.getElementById("managerId");
+	var projectCode = document.getElementById("projectCode");
+	var projectCode = document.getElementById("projectCode");
+	var siteName = document.getElementById("siteName");
+	var coreSet = document.getElementById("coreSet");
+	var fixSet = document.getElementById("fixSet");
+	var coreSetApplyCode = document.getElementById("coreSetApplyCode");
+	var patchVeri = document.getElementById("patchVeri");
+
+	var registers = document.getElementById("registers");
+	var owners = document.getElementById("owners");
+	var managers = document.getElementById("managers");
+
+	if (productCodes != null && productCodes[0] != null && !isNull(productCodes[0].value)) {
+		return true;
+	}
+	if (modules != null && modules[0] != null && !isNull(modules[0].value))
+		return true;
+	if (versions != null && versions[0] != null && !isNull(versions[0].value))
+		return true;
+	if (patchVersions != null && patchVersions[0] != null && !isNull(patchVersions[0].value))
+		return true;
+	if (categoryCodes != null && categoryCodes[0] != null && !isNull(categoryCodes[0].value))
+		return true;
+	if (activities != null && activities[0] != null && !isNull(activities[0].value))
+		return true;
+	if (priorities != null && priorities[0] != null && !isNull(priorities[0].value))
+		return true;
+	if (severities != null && severities[0] != null && !isNull(severities[0].value))
+		return true;
+	if (defects != null && defects[0] != null && !isNull(defects[0].value))
+		return true;
+	if (listType != null && listType[0] != null && !isNull(listType[0].value) && listType[0].value != "1")
+		return true;
+
+	if (resolutions != null && resolutions[0] != null && !isNull(resolutions[0].value))
+		return true;
+	if (defects != null && defects[0] != null && !isNull(defects[0].value))
+		return true;
+	if (deals != null && deals[0] != null && !isNull(deals[0].value))
+		return true;
+	if (inquiries != null && inquiries[0] != null && !isNull(inquiries[0].value))
+		return true;
+	if (preventions != null && preventions[0] != null && !isNull(preventions[0].value))
+		return true;
+	if (closePs != null && closePs[0] != null && !isNull(closePs[0].value))
+		return true;
+	if (defReasons != null && defReasons[0] != null && !isNull(defReasons[0].value))
+		return true;
+
+	if (regStartDate != null && !isNull(regStartDate.value))
+		return true;
+	if (regEndDate != null && !isNull(regEndDate.value))
+		return true;
+	/*
+	if (regBeforeDate != null && !isNull(regBeforeDate.value))
+		return true;
+	if (regAfterDate != null && !isNull(regAfterDate.value))
+		return true;
+	*/
+	if (modStartDate != null && !isNull(modStartDate.value))
+		return true;
+	if (modEndDate != null && !isNull(modEndDate.value))
+		return true;
+	/*
+	if (modBeforeDate != null && !isNull(modBeforeDate.value))
+		return true;
+	if (modAfterDate != null && !isNull(modAfterDate.value))
+		return true;
+	*/
+	if (closedStartDate != null && !isNull(closedStartDate.value))
+		return true;
+	if (closedEndDate != null && !isNull(closedEndDate.value))
+		return true;
+	/*
+	if (closedBeforeDate != null && !isNull(closedBeforeDate.value))
+		return true;
+	if (closedAfterDate != null && !isNull(closedAfterDate.value))
+		return true;
+	*/
+	if (rndPatchStartDate != null && !isNull(rndPatchStartDate.value))
+		return true;
+	if (rndPatchEndDate != null && !isNull(rndPatchEndDate.value))
+		return true;
+	
+	/*
+	if (rndPatchBeforeDate != null && !isNull(rndPatchBeforeDate.value))
+		return true;
+	if (rndPatchAfterDate != null && !isNull(rndPatchAfterDate.value))
+		return true;
+	*/
+	
+	if (qaTestEndStartDate != null && !isNull(qaTestEndStartDate.value))
+		return true;
+	if (qaTestEndEndDate != null && !isNull(qaTestEndEndDate.value))
+		return true;
+	
+	/*
+	if (qaTestEndBeforeDate != null && !isNull(qaTestEndBeforeDate.value))
+		return true;
+	if (qaTestEndAfterDate != null && !isNull(qaTestEndAfterDate.value))
+		return true;
+	*/
+	if (siteApplyStartDate != null && !isNull(siteApplyStartDate.value))
+		return true;
+	if (siteApplyEndDate != null && !isNull(siteApplyEndDate.value))
+		return true;
+	/*
+	if (siteApplyBeforeDate != null && !isNull(siteApplyBeforeDate.value))
+		return true;
+	if (siteApplyAfterDate != null && !isNull(siteApplyAfterDate.value))
+		return true;
+	*/
+	if (keyword != null && !isNull(keyword.value))
+		return true;
+	if (qaComment != null && !isNull(qaComment.value))
+		return true;
+	if (taggingWord != null && !isNull(taggingWord.value))
+		return true;
+	if (issueId != null && !isNull(issueId.value))
+		return true;
+	if (bugNo != null && !isNull(bugNo.value))
+		return true;
+	if (registerId != null && !isNull(registerId.value))
+		return true;
+	if (ownerId != null && !isNull(ownerId.value))
+		return true;
+	if (managerId != null && !isNull(managerId.value))
+		return true;
+	if (registers != null && !isNull(registers.value)) {
+		return true;
+	}
+	if (owners != null && !isNull(owners.value)) {
+		return true;
+	}
+	if (managers != null && !isNull(managers.value)) {
+		return true;
+	}
+	if (projectCode != null && !isNull(projectCode.value))
+		return true;
+	if (siteName != null && !isNull(siteName.value))
+		return true;
+	if (coreSet != null && !isNull(coreSet.value))
+		return true;
+	if (fixSet != null && !isNull(fixSet.value))
+		return true;
+	if (coreSetApplyCode != null && !isNull(coreSetApplyCode.value))
+		return true;
+	if (patchVeri != null && !isNull(patchVeri.value))
+		return true;
+	return false;
+}
+
+function goReportSearch(f, searchType) {
+	jQuery("#load").show();
+	// 채널SE인 경우 제품 선택확인
+	var userGrade = document.getElementById("userGrade").value;
+	if ('채널SE' == userGrade) {
+		var prodCombo = jQuery("#productCodes option:selected");
+		if (prodCombo.length < 1) {
+			alert("Please select a product.");
+			jQuery("#load").hide();
+			return false;
+		}
+	}
+
+	var cdtCheck = chkCdtAtLeast();
+	if (!cdtCheck) {
+		alert("Please enter at least one condition.");
+		jQuery("#load").hide();
+		return;
+	}
+	jQuery("#load").show();
+	f.pageIndex.value = "1";
+	f.clickColumn.value = "";
+	f.orderType.value = "desc";
+	f.searchType.value = searchType;
+	setFormAction(f, searchType);
+	f.submit();
+}
+
+function titleClickReport(col2, searchType, colType) {
+	var searchAction = document.getElementById("moveSearchAction");
+	var isSearchAction = (searchAction == null) ? false : true;
+	if (colType != "N" && isSearchAction) {
+		var cdtCheck = chkCdtAtLeast();
+		if (!cdtCheck) {
+			alert("Please enter at least one condition.");
+			return;
+		}
+	}
+	f = document.forms[0];
+	f.searchType.value = searchType;
+	setFormAction(f, searchType);
+	if (colType == "N") {
+		colType = "";
+	}
+	titleClick(col2, colType);
+}
+
+function titleClick(col2, colType) {
+	
+	jQuery("#load").show();	
+	jQuery("#pageIndex").val(1);
+	
+	f = document.forms[0];
+	var cType = (colType == null) ? "" : colType;
+	var col = document.getElementById(("clickColumn" + cType));
+
+	var orderType = document.getElementById(("orderType" + cType));
+
+	if (col.value == col2) {
+		if (orderType.value == "desc") {
+			orderType.value = "asc";
+		} else {
+			orderType.value = "desc";
+		}
+	} else {
+		orderType.value = "asc";
+	}
+	col.value = col2;
+
+	f.submit();
+}
+
+function submitIssueModule(f) {
+	f.action = context + "/ims/issue/issueByModuleList.do";
+	f.submit();
+}
+
+function submitIssueCateList(f) {
+	f.action = context + "/ims/issue/issueByCategoryList.do";
+	f.submit();
+}
+
+function goSearchForm(f, searchType) {
+	f.searchType.value = searchType;
+	var url = context + "/ims/issue/issueSearchForm.do";
+	f.action = url;
+	f.submit();
+}
+
+function setChartParam(xmlData) {
+	var flashVars = document.getElementById("flashVars");
+	flashVars.value = "dataUrl=" + xmlData + "&xml/layout_PIE_3D.xml";
+}
+
+function getSearchCondVali(f) {
+	if (!isNull(f.issueId.value)) {
+		if (!containsCharsOnly(f.issueId.value, "0123456789,")) {
+			if (!errorMessage(f.issueId, "Registration number may only contain numbers and (,).")) {
+				return false;
+			}
+		}
+	}
+
+	if (!isNull(f.bugNo)) {
+		if (!containsCharsOnly(f.bugNo.value, "0123456789,")) {
+			if (!errorMessage(f.bugNo, "Bug number may only contain numbers and (,).")) {
+				return false;
+			}
+		}
+	}
+
+	if (!isNull(f.regStartDate.value) && !isNull(f.regEndDate.value)) {
+		if (f.regStartDate.value > f.regEndDate.value) {
+			alert("The registered start date must be earlier than the end date!");
+			return false;
+		}
+	}
+
+	if (!isNull(f.modStartDate.value) && !isNull(f.modEndDate.value)) {
+		if (f.modStartDate.value > f.modEndDate.value) {
+			alert("The modified start date must be earlier than the end date!");
+			return false;
+		}
+	}
+
+	if (!isNull(f.closedStartDate.value) && !isNull(f.closedEndDate.value)) {
+		if (f.closedStartDate.value > f.closedEndDate.value) {
+			alert("The closed start date must be earlier than the end date!");
+			return false;
+		}
+	} 
+	return true;
+}
+
+function setCRCheck() {
+	f = document.forms[0];
+	var activityId = f.activityId.value;
+	if (activityId == '5' || activityId == '7') {
+		f.closeRejectInclude.checked = true;
+		f.CRCheck.value = "Y";
+	}
+}
+
+function getSearchValidation(f) {
+	var bnClickYN = getValue('bnClickYN');
+	if (bnClickYN == "N") {
+		return false;
+	}
+	f.chkCondition.value = true;
+
+	if (!isNull(f.issueId.value)) {
+		if (!containsCharsOnly(f.issueId.value, "0123456789,")) {
+			if (!errorMessage(f.issueId, "Registration number may only contain numbers and (,).")) {
+				f.chkCondition.value = false;
+				return false;
+			}
+		}
+	}
+
+	if (!isNull(f.bugNo)) {
+		if (!containsCharsOnly(f.bugNo.value, "0123456789,")) {
+			if (!errorMessage(f.bugNo, "Bug number may only contain numbers and (,).")) {
+				f.chkCondition.value = false;
+				return false;
+			}
+		}
+	}
+
+	if (!isNull(f.regStartDate.value) && !isNull(f.regEndDate.value)) {
+		if (f.regStartDate.value > f.regEndDate.value) {
+			alert("The registered start date must be earlier than the end date!");
+			f.chkCondition.value = false;
+			return false;
+		}
+	} else {
+		if (isNull(f.regStartDate.value) && !isNull(f.regEndDate.value)) {
+			alert("Please enter a start date.");
+			f.chkCondition.value = false;
+			return false;
+		}
+		if (!isNull(f.regStartDate.value) && isNull(f.regEndDate.value)) {
+			alert("Please enter an end date.");
+			f.chkCondition.value = false;
+			return false;
+		}
+	}
+
+	if (!isNull(f.modStartDate.value) && !isNull(f.modEndDate.value)) {
+		if (f.modStartDate.value > f.modEndDate.value) {
+			alert("The modified start date must be earlier than the end date!");
+			f.chkCondition.value = false;
+			return false;
+		}
+	} else {
+		if (isNull(f.modStartDate.value) && !isNull(f.modEndDate.value)) {
+			alert("Please enter a start date.");
+			f.chkCondition.value = false;
+			return false;
+		}
+		if (!isNull(f.modStartDate.value) && isNull(f.modEndDate.value)) {
+			alert("Please enter an end date.");
+			f.chkCondition.value = false;
+			return false;
+		}
+	}
+
+	if (!isNull(f.closedStartDate.value) && !isNull(f.closedEndDate.value)) {
+		if (f.closedStartDate.value > f.closedEndDate.value) {
+			alert("The closed start date must be earlier than the end date!");
+			f.chkCondition.value = false;
+			return false;
+		}
+	} else {
+		if (isNull(f.closedStartDate.value) && !isNull(f.closedEndDate.value)) {
+			alert("Please enter a start date.");
+			f.chkCondition.value = false;
+			return false;
+		}
+		if (!isNull(f.closedStartDate.value) && isNull(f.closedEndDate.value)) {
+			alert("Please enter an end date.");
+			f.chkCondition.value = false;
+			return false;
+		}
+	}
+	if (f.actionType.value == 'SAVE') {
+		return false;
+	}
+	return true;
+}
+
+function goIssueByModuleList(f) {
+	if (!getSearchValidation(f)) {
+		return;
+	} else if (f.actionType.value == 'search') {
+		f.action = context + "/ims/issue/issueByModuleList.do";
+		f.submit();
+	}
+}
+
+/** from issue search ui * */
+function changeChk(chk) {
+	var CHK = document.getElementById("CRCheck");
+	if (chk != null) {
+		CHK = document.getElementById(chk);
+	}
+
+	var CRCheck = CHK.value;
+	if (CRCheck == "N") {
+		CHK.value = "Y";
+	} else {
+		CHK.value = "N";
+	}
+}
+
+function clickCheckBox(chkboxId, chkboxValue, rowUserId, userId) {
+	var chkbox = document.getElementsByName(chkboxId);
+	var chkValue = document.getElementsByName(chkboxValue);
+	var rowUser = document.getElementsByName(rowUserId);
+
+	for (var i = 0; i < rowUser.length; i++) {
+		if (rowUser[i].value == userId) {
+			if (chkbox[i].checked == true) {
+				chkValue[i].value = "Y";
+			} else {
+				chkValue[i].value = "N";
+			}
+		}
+	}
+}
+
+function setProductCondition(productCode, systemCode, userId, menuName) {
+	checkPartnerMeber();
+	findPrefixList();
+
+	var selectedProduct = jQuery("#productCodes option:selected");
+	if (selectedProduct.length > 1) {
+		if (menuName == 'issueSearch') {
+			clearSearchProdComboBox2();
+		}
+		return false;
+	}
+
+	ProductDwr.findSimpleModules(productCode, searchModuleProcess);
+	ProductDwr.findSearchMainVersions(productCode, systemCode, userId, searchVersionProcess);
+}
+
+// 파트너사인 경우 티베로 제품 선택시 reporter 강제세팅
+function checkPartnerMeber() {
+	var selectedProduct = jQuery("#productCodes option:selected");
+	var userGrade = jQuery("#userGrade").val();
+	var userName = jQuery("#userName").val();
+	var userId = jQuery("#userId").val();
+
+	// 파트너사인 경우 Tibero제품을 선택하면 Reporter에 본인을 세팅하여 검색시 본인이 등록한 것만 검색하도록 함.
+	// Tibero(070), Tibero HiDB(126), Tibero InfiniData(075), Tibero
+	// MMDBMS(074), ProSync(430), UPDB(073)
+	if ('채널SE' == userGrade) {
+		jQuery("#registerName").removeAttr("readonly");
+		jQuery("#registerSrchImg").css("display", "");
+		jQuery("#registerDelImg").css("display", "");
+		var regName = jQuery("#registerName").val();
+		if (regName == userName) {
+			jQuery("#registerName").val('');
+			jQuery("#registerId").val('');
+		}
+
+		jQuery.each(selectedProduct, function(index, item) {
+			var vProductVal = item.value;
+			if (vProductVal == '070' || vProductVal == '126' || vProductVal == '075' || vProductVal == '074' || vProductVal == '430' || vProductVal == '073') {
+				jQuery("#registerName").attr("readonly", true);
+				jQuery("#registerSrchImg").css("display", "none");
+				jQuery("#registerDelImg").css("display", "none");
+				jQuery("#registerName").val(userName);
+				jQuery("#registerId").val(userId);
+				return false;
+			}
+		});
+	}
+}
+
+function findPrefixList() {
+	var prodCombo = jQuery("#productCodes option:selected");
+	if (prodCombo.length == 1) {
+		jQuery.ajax({
+			url : "ims/product/findProductPrefixList.do",
+			dataType : "json",
+			type : "POST",
+			data : {
+				prodCode : prodCombo.val()
+			},
+			success : function(data, textStatus, jqXHR) {
+				jQuery("#prefix option").remove();
+				jQuery("#prefix").append("<option value=''>--- Select ---</option>");
+				if (data.length > 0) {
+					jQuery.each(data, function(index, item) {
+						if (item.delFlag == 'N') {
+							var newRow = "<option value='" + item.prefix + "'>" + item.prefix + "</option>";
+							jQuery("#prefix").append(newRow);
+						}
+					});
+
+				}
+			},
+			error : function(jqXHR, textStatus, errorThrown) {
+				statusCd = "[" + jqXHR.status + "][" + textStatus + "][" + errorThrown + "]";
+				alert(statusCd);
+			}
+		});
+	} else {
+		jQuery("#prefix option").remove();
+		jQuery("#prefix").append("<option value=''>--- Select ---</option>");
+	}
+}
+
+function searchModuleProcess(modules) {
+	jQuery("#modules option").remove();
+	var moduleCombo = jQuery("#modules");
+	var module = null;
+	for (var i = 0, j = 0; i < modules.length; i++) {
+		module = modules[i];
+		if (modules[i].parentModuleCode != null) {
+			var newRow = "<option value='" + module.moduleCode +"'>&nbsp;&nbsp;- " + module.moduleName +"</option>";
+			jQuery("#modules").append(newRow);
+		}else{
+			var newRow = "<option value='" + module.moduleCode +"'>" + module.moduleName +"</option>";
+			jQuery("#modules").append(newRow);
+		}
+	}
+}
+
+function searchVersionProcess(versions) {
+	var versionCombo = $("versions");
+	setVersionNpatchVersion(versions, versionCombo);
+	var versionCombo = $("patchVersions");
+	setVersionNpatchVersion(versions, versionCombo);
+}
+
+function setVersionNpatchVersion(versions, versionCombo) {
+	DWRUtil.removeAllOptions(versionCombo);
+	var version = null;
+	for (var i = 0, j = 0; i < versions.length; i++) {
+		version = versions[i];
+		versionCombo.options[j++] = new Option(version.versionName, version.versionCode, false, false);
+		if (versions[i].subVersions != null) {
+			var subVersion = null;
+			for (var k = 0; k < version.subVersions.length; k++) {
+				subVersion = version.subVersions[k];
+				versionCombo.options[j++] = new Option("  - " + subVersion.versionName, subVersion.versionCode, false, false);
+			}
+		}
+	}
+}
+
+function setCategoryCondition(categoryCode) {
+	IssueCategoryDwr.findCateActivities(categoryCode, searchActivityProcess);
+}
+
+function searchActivityProcess(activities) {
+	var activityCombo = $("activities");
+
+	DWRUtil.removeAllOptions(activityCombo);
+	DWRUtil.addOptions(activityCombo, activities, "activityId", "activityName");
+}
+
+function setEnterRegister(inputObj) {
+	var vReadOnlyCheck = inputObj.readOnly;
+	if (vReadOnlyCheck) {
+		return;
+	}
+	f = document.forms[0];
+	ignoreEnter(inputObj);
+	if (event.keyCode == 13) { // Enter key
+		setRegister(inputObj);
+	}else if(event.keyCode == 8){	//Back space
+		f.registerId.value = '';
+	}
+}
+
+function setEnterManager(inputObj) {
+	f = document.forms[0];
+	f.managerId.value = '';
+	ignoreEnter(inputObj);
+	if (event.keyCode == 13) { // Enter key
+		setManager(inputObj);
+	}else if(event.keyCode == 8){	//Back space
+		f.managerId.value = '';
+	}
+}
+
+// 긴급이슈 결재
+function setEnterApprover(inputObj) {
+	f = document.forms[0];
+	f.approveId.value = '';
+	ignoreEnter(inputObj);
+	if (event.keyCode == 13) { // Enter key
+		setApprover(inputObj);
+	}
+}
+
+function setApprover(inputObj) {
+	var userName = inputObj.value;
+	if (isNull(userName)) {
+		return;
+	}
+	UserDwr.findUsersByName(userName, setApprover2);
+}
+
+function setApprover2(users) {
+	f = document.issueForm;
+	if (isNull(users)) {
+		alert("Sorry, cannot find specified user.\n\nPlease enter the name of the user again.");
+		f.approveName.select();
+	} else {
+		if (users.length == 1) {
+			f.approveName.value = users[0].name;
+			f.approveId.value = users[0].id;
+		} else {
+			// popup
+			var userName = f.approveName.value;
+			var width = 668;
+			var height = 480;
+			var top = getY(height);
+			var left = getX(width);
+			var property = "top=" + top + ",left=" + left + ",width=" + width + ",height=" + height + ",scrollbars=1,resize=1, status=yes";
+			var ow = window.open("", "popupUserListWindow", property);
+			var uf = document.popupProjectListForm;
+			uf.action = "ims/user/popupUserList.do";
+			uf.formName.value = "issueForm";
+			uf.idField.value = "approveId";
+			uf.nameField.value = "approveName";
+			uf.searchText.value = userName;
+			uf.searchType.value = "A.NAME";
+			uf.target = "popupUserListWindow";
+			uf.submit();
+		}
+	}
+}
+
+function setRegister(inputObj) {
+	var userName = inputObj.value;
+	if (isNull(userName)) {
+		return;
+	}
+	UserDwr.findUsersByName(userName, setRegisterUser);
+}
+
+function setRegisterUser(users) {
+	f = document.issueSearchForm;
+	if (isNull(users)) {
+		alert("Sorry, cannot find specified user.\n\nPlease enter the name of the user again.");
+		f.registerId.value = '';
+		f.registerName.select();
+	} else {
+		if (users.length == 1) {
+			f.registerName.value = users[0].name;
+			f.registerId.value = users[0].id;
+		} else {
+			// popup
+			var userName = f.registerName.value;
+			var width = 668;
+			var height = 480;
+			var top = getY(height);
+			var left = getX(width);
+			var property = "top=" + top + ",left=" + left + ",width=" + width + ",height=" + height + ",scrollbars=1,resize=1, status=yes";
+			var ow = window.open("", "popupUserListWindow", property);
+			var uf = document.popupUserListForm;
+			uf.idField.value = "registerId";
+			uf.nameField.value = "registerName";
+			uf.searchText.value = userName;
+			uf.target = "popupUserListWindow";
+			uf.submit();
+		}
+	}
+}
+
+function setManager(inputObj) {
+	var userName = inputObj.value;
+	if (isNull(userName)) {
+		return;
+	}
+	UserDwr.findUsersByName(userName, setManagerUser);
+}
+
+function setManagerUser(users) {
+	f = document.issueSearchForm;
+	if (isNull(users)) {
+		alert("Sorry, cannot find specified user.\n\nPlease enter the name of the user again.");
+		f.managerId.value = '';
+		f.managerName.select();
+	} else {
+		if (users.length == 1) {
+			f.managerName.value = users[0].name;
+			f.managerId.value = users[0].id;
+		} else {
+			// popup
+			var userName = f.managerName.value;
+			var width = 668;
+			var height = 480;
+			var top = getY(height);
+			var left = getX(width);
+			var property = "top=" + top + ",left=" + left + ",width=" + width + ",height=" + height + ",scrollbars=1,resize=1,status=yes";
+			var ow = window.open("", "popupUserListWindow", property);
+			var uf = document.popupUserListForm;
+			uf.idField.value = "managerId";
+			uf.nameField.value = "managerName";
+			uf.searchText.value = userName;
+			uf.target = "popupUserListWindow";
+			uf.submit();
+		}
+	}
+}
+
+function setOwnerUser(users) {
+	// f = document.issueSearchForm;
+	if (isNull(users)) {
+		alert("Sorry, cannot find specified user.\n\nPlease enter the name of the user again.");
+		f.ownerId.value = '';
+		f.ownerName.select();
+	} else {
+		if (users.length == 1) {
+			f.ownerName.value = users[0].name;
+			f.ownerId.value = users[0].id;
+		} else {
+			// popup
+			var userName = f.ownerName.value;
+			var width = 668;
+			var height = 480;
+			var top = getY(height);
+			var left = getX(width);
+			var property = "top=" + top + ",left=" + left + ",width=" + width + ",height=" + height + ",scrollbars=1,resize=1,status=yes";
+			var ow = window.open("", "popupUserListWindow", property);
+			var uf = document.popupUserListForm;
+			uf.idField.value = "ownerId";
+			uf.nameField.value = "ownerName";
+			uf.searchText.value = userName;
+			uf.target = "popupUserListWindow";
+			uf.submit();
+		}
+	}
+}
+
+/** from issue list ui * */
+function setProductInfo(productCode, systemCode, userId) {
+	ProductDwr.findSimpleModules(productCode, listModuleProcess);
+	ProductDwr.findSearchMainVersions(productCode, systemCode, userId, listVersionProcess);
+}
+
+function listModuleProcess(modules) {
+	jQuery("#moduleCode option").remove();
+	var moduleCombo = jQuery("#modules");
+	var module = null;
+	jQuery("#moduleCode").append("<option value=''>--- select module ---</option>");
+	for (var i = 0, j = 0; i < modules.length; i++) {
+		module = modules[i];
+		if (modules[i].parentModuleCode != null) {
+			var newRow = "<option value='" + module.moduleCode +"'>&nbsp;&nbsp;- " + module.moduleName +"</option>";
+			jQuery("#moduleCode").append(newRow);
+		}else{
+			var newRow = "<option value='" + module.moduleCode +"'>" + module.moduleName +"</option>";
+			jQuery("#moduleCode").append(newRow);
+		}
+	}
+}
+
+function listVersionProcess(versions) {
+	var versionCombo = $("mainVersionCode");
+	var subVersionCombo = $("subVersionCode");
+
+	DWRUtil.removeAllOptions(versionCombo);
+	DWRUtil.removeAllOptions(subVersionCombo);
+
+	DWRUtil.addOptions("mainVersionCode", new Array({
+		versionCode : "",
+		versionName : " --- version --- "
+	}), "versionCode", "versionName");
+	DWRUtil.addOptions("subVersionCode", new Array({
+		versionCode : "",
+		versionName : " --- subVer --- "
+	}), "versionCode", "versionName");
+	DWRUtil.addOptions(versionCombo, versions, "versionCode", "versionName");
+
+	subVersionCombo.style.display = "none";
+}
+
+function setSubVersion(mainVersionCode, systemCode, userId) {
+	var productCode = $("productCode").value;
+	ProductDwr.findSearchSubVersions(productCode, systemCode, userId, mainVersionCode, listMainVersionProcess);
+}
+
+function listMainVersionProcess(subVersions) {
+	var versionCombo = $("subVersionCode");
+
+	DWRUtil.removeAllOptions(versionCombo);
+	DWRUtil.addOptions("subVersionCode", new Array({
+		versionCode : "",
+		versionName : " --- subVer --- "
+	}), "versionCode", "versionName");
+	DWRUtil.addOptions(versionCombo, subVersions, "versionCode", "versionName");
+
+	if (!isNull(subVersions) && subVersions.length > 0) {
+		versionCombo.style.display = "";
+	} else {
+		versionCombo.style.display = "none";
+	}
+}
+
+function setCategoryInfo(categoryCode) {
+	IssueCategoryDwr.findCateActivities(categoryCode, listActivityProcess);
+}
+
+function listActivityProcess(activities) {
+	var activityCombo = $("activityId");
+
+	DWRUtil.removeAllOptions(activityCombo);
+	DWRUtil.addOptions("activityId", new Array({
+		activityId : "",
+		activityName : " --- select activity --- "
+	}), "activityId", "activityName");
+	DWRUtil.addOptions(activityCombo, activities, "activityId", "activityName");
+}
+
+function saveExcelList() {
+	setActionType('SAVE'); // 조회하는 액션을 실행하지 않도록 하기 위해설정
+	jQuery("#load").show();
+	var myform = document.forms[0];
+	myform.method = "get";
+	myform.action = context + "/util/saveListToExcel.do";
+		
+	var formLink = jQuery(myform).attr('action');
+	jQuery.fileDownload(formLink, {
+		data : jQuery(myform).serialize(),
+		httpMethod : 'POST',
+		successCallback : function(url){
+			jQuery("#load").hide();
+		},
+		failCallback : function(responseHtml, url){
+			jQuery("#load").hide();
+			alert('다운로드에 실패하였습니다. 다시시도해 주시기 바랍니다.');
+		}
+	})	
+	
+}
+
+function saveExcelSearch() {
+	setActionType('SAVE'); // 조회하는 액션을 실행하지 않도록 하기 위해설정
+
+	var myform = document.forms[0];
+	goIssueSearch(myform);
+	if (myform.chkCondition.value) {
+		myform.method = "get";
+		myform.action = context + "/util/saveSearchToExcel.do";
+		myform.submit();
+	}
+}
+
+function setActionType(type) {
+	document.getElementById("actionType").value = type;
+}
+
+function goIssueListChk(f) {
+	if (f.actionType.value == 'SAVE') {
+		return false;
+	} else {
+		f.action = context + "/ims/issue/issueListChk.do";
+	}
+	if (!isNull(f.issueId.value)) {
+		if (!containsCharsOnly(f.issueId.value, "0123456789")) {
+			if (!errorMessage(f.issueId, "Registration number may only contain numbers.")) {
+				return false;
+			}
+		}
+	}
+	f.pageIndex.value = "";
+	var col = f.clickColumn.value;
+	var order = f.orderType.value;
+	if (col == "ISSUE_ID") {
+		if (order == "desc") {
+			f.orderType.value = "asc";
+		} else {
+			f.orderType.value = "desc";
+		}
+	} else {
+		f.orderType.value = "desc";
+	}
+	f.clickColumn.value = "issueId";	
+	return true;
+}
+
+function chkIssueByModule(f) {
+	// 제품선택 체크
+	return true;
+}
+
+function chkIssueByCate(f) {
+	// 제품선택 체크
+	var dest = f.productCodes;
+	var j = 0;
+	for (var i = 0; i < dest.length; i++) {
+		opt = dest.options[i];
+		if (opt.selected) {
+			j++;
+		}
+	}
+	if (j == 0) {
+		alert("Select some products");
+		return false;
+	}
+	return true;
+}
+
+function goIssueChart() {
+	var prodCodes = document.getElementById("productCodes");
+	var pCodes = "";
+	for (var index = 0; index < prodCodes.length; index++) {
+		var isSelect = prodCodes.options[index].selected;
+		if (isSelect) {
+			pCodes += "/" + prodCodes.options[index].value;
+		}
+	}
+	pCodes = pCodes.replace('/', '');
+	document.getElementById("paramProdCodes").value = pCodes;
+}
+
+function goChart(f) {
+	var prodCodes = document.getElementById("productCodes");
+	var pCodes = "";
+	for (var index = 0; index < prodCodes.length; index++) {
+		var isSelect = prodCodes.options[index].selected;
+		if (isSelect) {
+			pCodes += "/" + prodCodes.options[index].value;
+		}
+	}
+	pCodes = pCodes.replace('/', '');
+	document.getElementById("paramProdCodes").value = pCodes;
+}
+
+function goIssueList(f) {
+	if (!isNull(f.issueId.value)) {
+		if (!containsCharsOnly(f.issueId.value, "0123456789")) {
+			if (!errorMessage(f.issueId, "Registration number may only contain numbers.")) {
+				return false;
+			}
+		}
+	}
+	f.pageIndex.value = "";
+	var col = f.clickColumn.value;
+	var order = f.orderType.value;
+	if (col == "ISSUE_ID") {
+		if (order == "desc") {
+			f.orderType.value = "asc";
+		} else {
+			f.orderType.value = "desc";
+		}
+	} else {
+		f.orderType.value = "desc";
+	}
+	jQuery("#load").show();
+	f.clickColumn.value = "issueId";
+	f.action = context + "/ims/issue/issueList.do";
+	return true;
+}
+
+function clearSearchProdComboBox() {
+	clearMutipleComboBox('productCodes');
+	clearSearchProdComboBox2();
+}
+
+function clearSearchProdComboBox2() {
+	clearMutipleComboBox('patchVersions');
+	clearMutipleComboBox('versions');
+	clearMutipleComboBox('modules');
+
+	var comboObj = $("patchVersions");
+	DWRUtil.removeAllOptions(comboObj);
+	comboObj = $("versions");
+	DWRUtil.removeAllOptions(comboObj);
+	comboObj = $("modules");
+	DWRUtil.removeAllOptions(comboObj);
+}
+
+function clearMutipleComboBox(elementId) {
+	var comboObj = $(elementId);
+	if (comboObj != null) {
+		for (var i = 0; i < comboObj.length; i++) {
+			comboObj.options[i].selected = false;
+		}
+	}
+}
+
+function addRelatedIssue() {
+	var destTable = opener.document.getElementById("RelatedIssueTable");
+	
+	//Parent 체크
+	var openerIssueId = jQuery("#issueId", opener.document).val();
+	var relationIssueType = jQuery("#relationIssueType").val();
+	if(relationIssueType == 'Parent'){
+		var flag = false;
+		jQuery.each(jQuery('input[name="rel_relationIssueType"]', destTable), function(index, item) {
+			if(item.value == 'Parent'){
+				flag = true;
+				alert("Parent has already been added.");
+				return;
+			}
+		});
+		
+		if(flag){
+			self.close();
+			return;
+		}
+	}
+	
+	var rows = destTable.rows;
+	var tRow = destTable.rows.length;
+	var issues = getAllCheckboxValue('relatedIssueIds');
+	var chk = issues.split('|-|');
+	var chkCount = 0;
+	var newIssues = '';
+
+	if (issues.length >= 1) {
+		for (var j = 0; j < chk.length; j++) {
+			var token = chk[j].split(';');
+			var insertYn = "Y";
+			for (var i = 1; i < tRow; i++) {
+				var issueId = '';
+				var type = jQuery("#rel_relationIssueType", rows[i]).val();
+				if(type == 'Parent'){
+					issueId = jQuery("#rel_relationIssueId", rows[i]).val();
+				}else{
+					issueId = jQuery("#relatedIssueIds", rows[i]).val();			
+				}
+				if (token[0] == issueId) {
+					i = tRow;
+					insertYn = "N";
+				}
+			}
+			if (insertYn == "Y") {
+				if (chkCount != 0) {
+					newIssues = (newIssues + '|-|' + chk[j]);
+				} else {
+					newIssues = chk[j];
+				}
+				++chkCount;
+			}
+		}
+
+		var newChk = newIssues.split('|-|');
+		if (!isNull(newChk)) {
+			for (j = 0; j < newChk.length; j++) {
+				var token = newChk[j].split(';');
+				row1 = destTable.insertRow(tRow++);
+
+				var relatedIssueIds;
+				var rel_relationIssueId;
+				if(relationIssueType == 'Parent'){
+					relatedIssueIds = openerIssueId;
+					relationIssueId = token[0];
+				}else{
+					relatedIssueIds = token[0];
+					relationIssueId = openerIssueId;					
+				}
+				
+				cell1 = row1.insertCell(0);
+				cell1.id = relatedIssueIds;
+				cell1.className = "data";
+				cell1.align = "center";
+				cell1.style.cssText = "padding: 3px;";
+				cell1.innerHTML = "<input type=\"checkbox\" id=\"relatedIssueIds\" name=\"relatedIssueIds\" value=\"" + relatedIssueIds + "\">"
+								+ "<input type=\"hidden\" id=\"rel_relationIssueId\" name=\"rel_relationIssueId\" value=\"" + relationIssueId + "\">"
+								+ "<input type=\"hidden\" id=\"rel_relationIssueType\" name=\"rel_relationIssueType\" value=\"" + relationIssueType + "\">";
+
+				cell2 = row1.insertCell(1);
+				cell2.className = "data";
+				cell2.style.cssText = "padding: 3px;";
+				cell2.innerHTML = relationIssueType;
+				
+				cell2 = row1.insertCell(2);
+				cell2.className = "data text-right";
+				cell2.style.cssText = "padding: 3px;";
+				cell2.innerHTML = token[0];
+
+				cell3 = row1.insertCell(3);
+				cell3.className = "data text-left";
+				cell3.style.cssText = "padding: 3px;";
+				cell3.innerHTML = token[2];
+
+				cell4 = row1.insertCell(4);
+				cell4.className = "data text-left";
+				cell4.style.cssText = "padding: 3px;";
+				cell4.innerHTML = token[1];
+			}
+		}
+		
+		jQuery(":input:radio[name=relationIssueType]", opener.document).attr("disabled", true);
+		if(relationIssueType == 'Parent'){
+			self.close();
+		}else{
+			alert("Successfully Added!");
+		}
+	}
+}
+
+function addCheckedUser() {
+	var destTable = opener.document.getElementById("CheckedUserTable");
+	var tRow = destTable.rows.length;
+	var issues = getAllCheckboxValue('checkedUserIds');
+	var chk = issues.split('|-|');
+
+	if (issues.length >= 1) {
+		for (var j = 0; j < chk.length; j++) {
+			var token = chk[j].split(';');
+
+			row1 = destTable.insertRow(tRow++);
+
+			cell1 = row1.insertCell(0);
+			cell1.userId = token[0];
+			cell1.className = "data text-center padding3px";
+			cell1.innerHTML = "<input type=\"checkbox\" id=\"checkedUserIds\" name=\"checkedUserIds\" value=\"" + token[0] + "\">"
+					+ "<input type=\"hidden\" id=\"checkedUserVal\" name=\"checkedUserVal\" value=\"" + token[0] + "\">";
+
+			cell2 = row1.insertCell(1);
+			cell2.className = "data text-left padding3px";
+			cell2.innerHTML = token[1] + "(" + token[0] + ")";
+
+			cell3 = row1.insertCell(2);
+			cell3.className = "data padding3px";
+			cell3.innerHTML = "<input type=\"checkbox\" id=\"issueSendYn\" name=\"issueSendYn\" value=\"Y\" checked onClick=\"clickCheckBox('issueSendYn', 'issueSendYnVal', 'checkedUserVal','"
+					+ token[0] + "');\">" + "<input type=\"hidden\" id=\"issueSendYnVal\" name=\"issueSendYnVal\" value=\"Y\">";
+
+			cell4 = row1.insertCell(3);
+			cell4.className = "data padding3px";
+			cell4.innerHTML = "<input type=\"checkbox\" id=\"actionSendYn\" name=\"actionSendYn\" value=\"Y\" checked onClick=\"clickCheckBox('actionSendYn','actionSendYnVal', 'checkedUserVal','"
+					+ token[0] + "');\">" + "<input type=\"hidden\" id=\"actionSendYnVal\" name=\"actionSendYnVal\" value=\"Y\">";
+
+			cell5 = row1.insertCell(4);
+			cell5.className = "data padding3px";
+			cell5.innerHTML = "<input type=\"checkbox\" id=\"smsSendYn\" name=\"smsSendYn\" value=\"Y\" checked onClick=\"clickCheckBox('smsSendYn', 'smsSendYnVal', 'checkedUserVal','"
+					+ token[0] + "');\">" + "<input type=\"hidden\" id=\"smsSendYnVal\" name=\"smsSendYnVal\" value=\"Y\">";
+		}
+		alert("Successfully Added!");
+	}
+}
+
+function getAllCheckboxValue(id) {
+	var checkBox = document.getElementsByName(id);
+	var checkedValue = '';
+	for (var i = 0; i < checkBox.length; i++) {
+		if ((checkBox[i].checked)) {
+			checkedValue += checkBox[i].value + '|-|';
+		}
+	}
+	return checkedValue.substring(0, checkedValue.lastIndexOf('|-|'));
+}
+
+function allCheck(flag, id, val) {
+	
+	var checkBox = document.getElementsByName(id);
+	if (isNull(checkBox)) {
+		return;
+	}
+	var cbLength = checkBox.length;
+	if (isNull(cbLength)) {
+		checkBox.checked = flag;
+	} else {
+		for (var i = 0; i < cbLength; i++) {
+			checkBox[i].checked = flag;
+		}
+	}
+	if (val == null) {
+		cFlag = !flag;
+	} else if (val == 'N') {
+
+	} else {
+		eval(val + "=" + !flag + ";");
+	}
+}
+
+function popupColumnSetting() {
+	var width = 750;
+	var height = 280;
+	var top = getY(height);
+	var left = getX(width);
+	var property = "top=" + top + ",left=" + left + ",width=" + width + ",height=" + height + ",scrollbars=1,resize=1,status=yes";
+
+	var url = context + "/ims/profile/mainConfigForm.do?&menuCode=issue_home&subMenuCode=issue_profile&popup=Yes";
+
+	var approveWin = window.open(url, "columnSetting", property);
+	if (approveWin && approveWin != null)
+		approveWin.focus();
+}
+
+/* go viewIssue page */
+function goViewIssue(form, issueId, menuCode) {
+	form.issueId.value = issueId;
+	form.menuCode.value = menuCode;
+	form.submit();
+}
+
+/* go kms page */
+function goKmsFrom(form, issueId) {
+	form.issueId.value = issueId;
+	form.submit();
+
+}
+
+function popupExceptReason(issueId, save) {
+	var width = 600;
+	var height = 250;
+	var top = getY(height);
+	var left = getX(width);
+	var property = "top=" + top + ",left=" + left + ",width=" + width + ",height=" + height + ",scrollbars=1,resize=1,status=yes";
+
+	var url = context + "/ims/knowledge/popupExceptReason.do?issueId=" + issueId + "&save=" + save;
+	var approveWin = window.open(url, "KMS_EXCEPT", property);
+
+	if (approveWin && approveWin != null) {
+		approveWin.focus();
+	}
+}
+
+// keyword검색 serach guide
+function fn_popKeywordHelp() {
+	var winHeight = document.body.clientHeight; // 현재창의 높이
+	var winWidth = document.body.clientWidth; // 현재창의 너비
+	var winX = window.screenX || window.screenLeft || 90;// 현재창의 x좌표
+	var winY = window.screenY || window.screenTop || 90; // 현재창의 y좌표
+
+	var popWidth = 530;
+	var popHeight = 700;
+	var popX = winX + (winWidth - popWidth) / 2;
+	var popY = winY + (winHeight - popHeight) / 2;
+
+	var property = "top=" + popY + ",left=" + popX + ",width=" + popWidth + ",height=" + popHeight + ",scrollbars=1,resize=1,status=yes";
+
+	var vWin = window.open(context + '/html/ims/issueKeywordHelp.html', 'SmallWindow', property);
+	if (vWin == null && vWin.closed)
+		vWin.focus();
+}
+
+// issue 번호 체크
+function fn_checkNumList(objId, txt) {
+	var obj = document.getElementById(objId);
+	var vIsNum = true;
+	var issues;
+	if (obj.value != '') {
+		var vArr = obj.value.split(/\s/g);
+		for (var idx = 0; idx < vArr.length; idx++) {
+			if (!vArr[idx].trim().isNumeric()) {
+				vIsNum = false;
+				break;
+			}
+			if (idx > 0) {
+				issues = issues + " " + vArr[idx].trim();
+			} else {
+				issues = vArr[idx];
+			}
+		}
+		if (!vIsNum) {
+			alert(txt + ' Number는 숫자만 허용합니다. - ' + vArr[idx]);
+			setTimeout(function() {
+				obj.focus()
+			}, 1);
+			return false;
+		} else {
+			document.getElementById(objId).value = issues;
+		}
+	}
+}
+
+String.prototype.trim = function() {
+	return (this.replace(/^\s+/, '')).replace(/\s+$/, '');
+}
+
+String.prototype.isNumeric = function() {
+	return (this != null && !isNaN(this) && this.trim() != "");
+}
+
+Number.prototype.isNumeric = function() {
+	return (this != null && !isNaN(this));
+}

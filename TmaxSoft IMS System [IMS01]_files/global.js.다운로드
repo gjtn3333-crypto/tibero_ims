@@ -1,0 +1,317 @@
+﻿// 브라우저 체크
+var browserType = "";
+if (navigator.userAgent.indexOf("Firefox") > 0) {
+	browserType = "Firefox";
+} else if (navigator.userAgent.indexOf("MSIE 6.0") > 0) { // IE 6.0
+	browserType = "E6";
+} else if (navigator.userAgent.indexOf("MSIE 7.0") > 0) {
+	browserType = "E7";
+} else {
+	browserType = "ETC";
+}
+
+if(navigator.userAgent.indexOf("Mac") > 0){
+	browserType = "Mac";
+}
+
+function chgVisible(id) {
+	var obj = document.getElementById(id);
+	if (obj.style.display == "") {
+		obj.style.display = "none";
+	} else {
+		obj.style.display = "";
+	}
+}
+
+function menuPop(exeURL) {
+	window.open(exeURL, 'kor_manual',
+			'width=1200,height=600,scrollbars=yes,resizable=yes');
+}
+
+function chgImage(id) {
+	if(jQuery("#"+id).find(".link1").hasClass("spread")){
+		jQuery("#"+id).find(".link1").removeClass("spread");
+		jQuery("#"+id).find(".link1").addClass("fold");
+	}else{
+		jQuery("#"+id).find(".link1").removeClass("fold");
+		jQuery("#"+id).find(".link1").addClass("spread");
+	}	
+}
+
+function viewUserInfo() {
+	/*
+	 * var url = context + "/user/userInfo.do"; var height = "500px"; var width =
+	 * "540px"; var prop = "dialogWidth:" + width + "; dialogHeight:" + height + ";
+	 * center:yes; help:no; status:no; scroll:no; resizable:yes";
+	 * 
+	 * window.showModalDialog(url, null, prop);
+	 */
+
+	var url = context + "/user/userInfoForm.do";
+	var width = 540;
+	var height = 460;
+	var top = getY(height);
+	var left = getX(width);
+	var property = "top=" + top + ",left=" + left + ",width=" + width
+			+ ",height=" + height + ",scrollbars=1,resizable=1";
+	var ow = window.open(url, "popupUserFormWindow", property);
+}
+
+function goFamilySite(site, email, empNo) {
+	var url = null;
+	var timsSite;
+	if(email.substr(email.indexOf("@")+1) == "tmax.co.kr"){
+		timsSite = "tmaxsoft";
+	}else if (email.substr(email.indexOf("@")+1) == "tmaxdata.com"){
+		timsSite = "tmaxdata";
+	}
+
+	if(site == "email") {
+		if(timsSite == "tmaxsoft") {
+			url = "http://mail.tmax.co.kr";
+		}else if (timsSite == "tmaxdata") {
+			url = "http://mail.tmaxdata.com";
+		}
+	}else if (site == "tims") {
+		if(empNo.substr(0,2) == "TG"){	//Global TIMS : 사번이 TG로 시작함
+			url = "http://gtims.tmaxsoft.com/ssoLoginCheck.tmv?page=login&empNo=" + empNo;
+		}else{		
+			if(timsSite == "tmaxsoft") {
+				url = "http://tims.tmax.co.kr/ssoLoginCheck.tmv?page=login&empNo=" + empNo;
+			}else if (timsSite == "tmaxdata") {
+				url = "http://tims.tmaxdata.com/ssoLoginCheck.tmv?page=login&empNo=" + empNo;
+			}
+		}
+	}else if (site == "skymail") {
+		url = "http://mail.tmax.co.kr";
+	}else if (site == "technet") {
+		url = "http://technet.tmaxsoft.com/ko/front/main/main.do?tmaxsso=yes";
+	}else if (site == "kss") {
+		url = "http://kss.tmax.co.kr/";
+	}else {
+		return;
+	}
+	
+	window.open("/tody/ims/common/familySite.do?familySiteUrl="+url, "Window", "");
+}
+
+function movePage(pageIndex, formObject) {
+	jQuery("#load").show();
+	var f = (formObject) ? formObject : document.forms[0];
+	var searchAction = document.getElementById("moveSearchAction");
+	var isSearchAction = (searchAction == null) ? false : true;
+	if (isSearchAction) {
+		var cdtCheck = chkCdtAtLeast();
+		if (!cdtCheck) {
+			alert("Please enter at least one condition.");
+			jQuery("#load").hide();
+			return;
+		}
+		f.action = searchAction.value;
+	}
+	
+	//issueList 화면관련
+	var moveIssueList = document.getElementById("moveIssueList");
+	var isMoveIssueList = (moveIssueList == null) ? false : true;
+	if (isMoveIssueList) {
+		f.action = moveIssueList.value;
+	}
+	
+	f.pageIndex.value = pageIndex;
+	f.submit();
+}
+
+function setPageSize(formObject) {
+	var f = (formObject) ? formObject : document.forms[0];
+	f.pageIndex.value = "";
+	jQuery("#load").show()
+	f.submit();
+}
+
+// #############################################
+// 함수명: isNull
+// 기능: 입력값이 널인지 체크한다.
+// 호출시점: 공통유틸성 호출
+// 인수: str(String값)
+// 리턴: 입력값의 널여부(true, false)
+// #############################################
+function isNull(str) {
+	if (str == null || str == "" || typeof str == "undefined")
+		return true;
+	return false;
+}
+
+function containsCharsOnly(str, chars) {
+	for (var inx = 0; inx < str.length; inx++) {
+		if (chars.indexOf(str.charAt(inx)) == -1)
+			return false;
+	}
+	return true;
+}
+
+function getX(docW) {
+	var scrW = screen.availWidth;
+	var x = (scrW - docW) / 2;
+	return x;
+}
+
+function getY(docH) {
+	var scrH = screen.availHeight;
+	var y = (scrH - docH) / 2;
+	return y;
+}
+
+function popupWindow(url, wName, width, height, property) {
+	var left = getX(width);
+	var top = getY(height);
+	var popWin = window.open(url, wName, "left=" + left + ",top=" + top
+					+ ", width=" + width + ", height=" + height + ","
+					+ (isNull(property) ? "" : property));
+	return popWin;
+}
+
+function getComboBoxValue(obj) {
+	if (obj.selectedIndex < 0)
+		return null;
+	return obj.options[obj.selectedIndex].value;
+}
+
+function setComboBoxValue(obj, val) {
+	var val1 = val;
+
+	var idx = 0;
+	for (var i = 0; i < obj.length; i++) {
+		if (obj.options[i].value == val) {
+			// obj.options[i].seleted = true;
+			// return;
+			idx = i;
+			break;
+		}
+	}
+	// alert(">>setComboBox idx="+idx);
+	obj.options.selectedIndex = idx;
+}
+
+function resetComboBox(comboObj) {
+	for (var i = (comboObj.length - 1); i >= 0; i--) {
+		comboObj.options[i] = null;
+	}
+}
+
+function isChecked(obj) {
+	if (obj == null)
+		return false;
+	var cnt = obj.length;
+
+	if (isNull(cnt) || cnt == 1) {
+		if (obj.checked == true)
+			return true;
+	} else {
+		for (var i = 0; i < cnt; i++) {
+			if (obj[i].checked == true)
+				return true;
+		}
+	}
+	return false;
+}
+
+function setRadioBoxValue(obj, val) {
+	for (var i = 0; i < obj.length; i++) {
+		if (obj[i].value == val) {
+			obj[i].checked = true;
+		}
+	}
+}
+
+function getRadioBoxValue(obj) {
+	var cnt = obj.length;
+
+	if (cnt == null || cnt == 1) {
+		if (obj.checked == true)
+			return obj.value;
+	} else {
+		for (var i = 0; i < obj.length; i++) {
+			if (obj[i].checked) {
+				return obj[i].value;
+			}
+		}
+	}
+	return "";
+}
+
+function getRadioBoxCheckValue(input) {
+
+	var radio = document.getElementsByName(input);
+	var rtn = null;
+
+	for (var i = 0; i < radio.length; i++) {
+		if (radio[i].checked) {
+			return radio[i].value;
+		}
+	}
+}
+
+// #############################################
+// 함수명: errorMessage
+// 기능: 에러메시지를 alert로 오픈하고,
+// 포커스를 해당 인스턴스로 이동시킨다.
+// 호출시점: 필수입력항목이 null일 경우
+// 인수: obj: 포커스가 이동할 객체, msg: 경고메시지
+// 리턴: false
+// #############################################
+function errorMessage(obj, msg) {
+	try {
+		alert(msg);
+
+		if (obj.type == "select-one") {
+			obj.focus();
+		}
+		else if(obj.type == "select-multiple"){
+			obj.focus();
+		}
+		else {
+			obj.focus();
+			obj.select();
+		}
+		return false;
+	} catch (errorObject) {
+		var msg = errorObject.description + "\n\n" + "Error Number : "
+				+ (errorObject.number >> 16 & 0x1FFF) + "\n\n";
+		alert(msg);
+		return false;
+	}
+}
+
+function ignoreEnter(inputObj) {
+	var code = window.event.keyCode;
+	if (code == 13) {
+		window.event.returnValue = false;
+		return;
+	}
+	window.event.returnValue = true;
+}
+
+function getByteLength(str) {
+	var len = 0;
+	if (str == null)
+		return 0;
+
+	for (var i = 0; i < str.length; i++) {
+		var c = escape(str.charAt(i));
+		if (c.length == 1)
+			len++;
+		else if (c.indexOf("%u") != -1)
+			len += 3; // for utf-8
+		else if (c.indexOf("%") != -1)
+			len += c.length / 3;
+	}
+	return len;
+}
+
+//ISO에서 select에서 onchange로 call한 function에서 alert, confirm시 멈추는 현상 방지
+function alertTimeout(message){
+	setTimeout(function() {
+		alert(message);
+	}, 0);
+}
+

@@ -1,0 +1,132 @@
+function allCheckIn(dest) {
+  for (var i=0; i<dest.length; i++) {
+    dest.options[i].selected = true;
+  }
+}
+
+function updateUser(f) {
+  if (!confirm("저장 하시겠습니까?")) {
+    return false;
+  }  
+  allCheckIn(f.groupCodes);
+  jQuery("#load").show();
+  return true;
+}
+
+function deleteUserGroup() {
+  var f = document.UserForm;
+  var dest = f.groupCodes;
+  for (var i=(dest.length-1); i>=0; i--) {
+    if (dest.options[i].selected) {
+      dest.options[i] = null;
+    }
+  }
+}
+
+function moveUserGroup() {
+  var f = document.UserForm;
+  var org = f.userGroup;
+  var dest = f.groupCodes;
+  
+  var destSize = dest.length;
+  var opt = null;
+  for (var i=0; i<org.length; i++) {
+    opt = org.options[i];
+    if (!isDuplicateGroup(opt.value, dest)) {
+      if (opt.selected == true) {
+        dest.options[destSize++] = new Option(opt.text, opt.value, false, false);
+      }
+    }
+    opt.selected = false;
+  }
+}
+
+function isDuplicateGroup(groupCode, dest) {
+  var opt = null;
+  for (var i=0; i<dest.length; i++) {
+    opt = dest.options[i];
+    if (groupCode == opt.value) {
+      return true;
+    }
+  }
+  
+  return false;
+}
+
+function viewUser(id) {
+	var f = document.UserListForm;
+	f.id.value = id;
+	f.action = context + "/ims/user/userForm.do";
+	f.submit();
+}
+
+function goUserList() {
+	var f = document.ParameterForm;
+	jQuery("#load").show();
+	f.submit();
+}
+
+function goUserSearch(f) {
+	jQuery("#load").show();
+	f.pageIndex.value = "1";
+	return true;
+}
+
+//사용자 검색 : autocomplete
+document.write("<link rel=\"stylesheet\" href=\"js/jquery/jquery-ui-themes-1.12.1/themes/base/jquery-ui.css\">");
+document.write("<style type=\"text/css\">");
+document.write("	li {font-size: 12px;}>");
+document.write("</style>");
+document.write("<script src=\"js/jquery/jquery-ui-1.12.1.min.js\"></script>");
+//type : '' (재직자), 'ALL' (퇴직자 포함)
+function fn_findUser(inputName, inputId, type){
+	jQuery("#"+inputName).autocomplete({
+		source : function(request, response) {
+			jQuery.ajax({
+				url : "ims/user/userListAjax.do",
+				dataType : "json",
+				data : {
+					searchText : request.term,
+					type : type
+				},
+				success : function(data) {
+					jQuery("#"+inputId).val('');
+					
+					response(jQuery.map(data, function(item) {
+						var label = '';
+						if(item.useFlag == 'N'){
+							label = item.name + " (퇴직) " + item.empNo;
+						}else{
+							label = item.name + " (" + item.deptName + ") " + item.empNo;
+						}
+						
+						return {
+							label : label,
+							value : item.name,
+							id : item.id,
+							empNo : item.empNo,
+							name : item.name,
+							deptNm: item.deptNm
+						}
+					}));
+				}
+			});
+		},
+		select : function(event, ui) {
+			jQuery("#"+inputId).val(ui.item.id);
+		},
+		minLength : 1,
+		focus : function(event, ui) {
+			// 한글입력오류 조치
+			return false;
+		},
+		delay: 100
+	});
+	
+	//이름 삭제한 경우 id 삭제
+	jQuery(document).on("blur", "#"+inputName, function(){
+		if(jQuery(this).val() == ''){
+			jQuery("#"+inputId).val('');
+		}
+	});
+}

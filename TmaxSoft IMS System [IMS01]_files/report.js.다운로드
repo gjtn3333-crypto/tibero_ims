@@ -1,0 +1,155 @@
+function test(){
+    var test = "test";
+}
+
+function setProductName(str){
+   var f = document.forms[0];
+   f.productName.value = str;
+}
+
+function strTokenizer(str, c){
+    var i=0;
+    var k=0;
+
+    var arr = new Array;
+    while(i > -1){
+    	i = str.indexOf(c);
+    	if(str.substr(0,i) != '') arr[k] = str.substr(0,i);
+    	str = str.substr(i+1,str.length);
+    	k++;
+    }
+    return arr;
+}
+
+
+
+function chgOrderBy(order) {   
+  //var myform = document.forms[0];
+  //myform.orderBy.value = order; 
+  
+  var arr = new Array;
+  arr = strTokenizer("a1:0,b2:0,c1:0,d1:0,e1:0,f1:0", ",");
+  
+  var arr = new Array;
+  arr[1] = "a1";
+  arr[2] = "a2";
+  alert(arr.length);
+  
+  //myform.submit();
+}
+
+function goIssueRegistReport() {  
+  var myform=document.forms[0];
+  myform.method="get";
+  //myform.target="winName";  
+  myform.action="/tody/ims/issue/issueRegistReport.do";
+  return true;	
+}
+
+function goIssueDispoReport() {  
+  var myform=document.forms[0];
+  myform.method="get";
+  myform.orderBy.value = ""; 
+  //myform.target="winName";  
+  myform.action="/tody/ims/issue/issueDispoReport.do";
+  return true;	
+}
+
+function goIssueCmpReport() {    
+  var myform=document.forms[0];
+  var reportType = document.getElementById("reportType").value;
+  if (isNull(reportType)){
+     alert("Please select report type.");
+     return false;
+  }
+  
+  jQuery("#load").show();
+  myform.method="get";
+  myform.orderBy.value = ""; 
+  myform.action="/tody/ims/issue/issueCmpReport.do";
+  return true;	
+}
+
+function goIssueCmpBReport() {  
+
+  var myform=document.forms[0];
+  myform.method="get";
+  myform.orderBy.value = ""; 
+  //myform.target="winName";  
+  myform.action="/tody/ims/issue/issueCmpBReport.do";
+  return true;	
+}
+
+function viewReport(test, menuCode) {
+	if (isNull(menuCode)) menuCode = "";
+	if (isNull(test))     test = "";
+	location.href = context + "/ims/issue/issueRegistReport.do";
+}
+
+function saveExcelRegist() {        		
+  var myform=document.forms[0];
+  myform.method="get";
+  //myform.target="winName";  
+  myform.action="/tody/util/saveToExcel.do";
+  myform.submit();
+}
+
+function saveExcelDispo() {        		
+  var myform=document.forms[0];
+  myform.method="get";
+  //myform.target="winName";  
+  myform.action="/tody/util/saveDispoToExcel.do";
+  myform.submit();
+}
+
+function saveExcelCmp() {    
+  var reportType = document.getElementById("reportType").value;
+  var reportLink = document.getElementById("reportLink").value; 
+  if (isNull(reportType)){
+     alert("Please select report type.");
+     return;
+  }    		
+  var myform=document.forms[0];
+  myform.method="get";    
+  myform.action= context + reportLink;
+  ajaxExcelDown(myform);
+  // myform.submit();
+}
+
+function saveExcelCmpB() {        		
+  var myform=document.forms[0];
+  myform.method="get";
+  //myform.target="winName";  
+  myform.action="/tody/util/saveCmpBToExcel.do";
+  myform.submit();
+}
+
+function setReport(reportTP) {    
+  var rType = document.getElementById(reportTP).value;
+  var token = rType.split(';');
+  document.getElementById("reportType").value = token[0]; 
+  document.getElementById("reportLink").value = token[1];
+  
+  var DIVArr = document.getElementsByTagName("DIV");
+  var tmp, tmp2;
+  for(i=0; i<DIVArr.length; i++){
+     tmp = DIVArr[i];     
+     tmp.style.display = "none";		
+  }
+  
+  var DIV = document.getElementById(token[0]+"DIV");  
+  DIV.style.display = ""; 
+
+  	var tableObj = document.getElementById(token[0]+"Table");  	
+  	var tRows = tableObj.rows;
+  	var tLength = tRows.length;
+    
+  	for(j=2; j<(tLength-1); j++)
+  	{        
+      tableObj.deleteRow(2);      
+  	}
+
+  var TR = document.getElementById(token[0]+"NOTR");  
+  TR.style.display = "";      
+
+}

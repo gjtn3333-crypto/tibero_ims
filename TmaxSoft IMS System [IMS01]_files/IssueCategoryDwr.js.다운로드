@@ -1,0 +1,62 @@
+
+function IssueCategoryDwr() { }
+
+IssueCategoryDwr.insertCategory = function(p0, p1, p2, callback)
+{
+    DWREngine._execute('/tody/dwr', 'IssueCategoryDwr', 'insertCategory', p0, p1, p2, callback);
+}
+
+IssueCategoryDwr.updateCategory = function(p0, p1, p2, callback)
+{
+    DWREngine._execute('/tody/dwr', 'IssueCategoryDwr', 'updateCategory', p0, p1, p2, callback);
+}
+
+IssueCategoryDwr.deleteCategory = function(p0, callback)
+{
+    DWREngine._execute('/tody/dwr', 'IssueCategoryDwr', 'deleteCategory', p0, callback);
+}
+
+IssueCategoryDwr.updateCategoryViewOrder = function(p0, callback)
+{
+    DWREngine._execute('/tody/dwr', 'IssueCategoryDwr', 'updateCategoryViewOrder', p0, callback);
+}
+
+IssueCategoryDwr.findCategories = function(callback)
+{
+    DWREngine._execute('/tody/dwr', 'IssueCategoryDwr', 'findCategories', callback);
+}
+
+IssueCategoryDwr.deleteActivity = function(p0, callback)
+{
+    DWREngine._execute('/tody/dwr', 'IssueCategoryDwr', 'deleteActivity', p0, callback);
+}
+
+IssueCategoryDwr.updateActivity = function(p0, callback)
+{
+    DWREngine._execute('/tody/dwr', 'IssueCategoryDwr', 'updateActivity', p0, callback);
+}
+
+IssueCategoryDwr.findActivity = function(p0, callback)
+{
+    DWREngine._execute('/tody/dwr', 'IssueCategoryDwr', 'findActivity', p0, callback);
+}
+
+IssueCategoryDwr.setIssueCategoryService = function(p0, callback)
+{
+    DWREngine._execute('/tody/dwr', 'IssueCategoryDwr', 'setIssueCategoryService', p0, callback);
+}
+
+IssueCategoryDwr.findCateActivities = function(p0, callback)
+{
+    DWREngine._execute('/tody/dwr', 'IssueCategoryDwr', 'findCateActivities', p0, callback);
+}
+
+IssueCategoryDwr.insertActivity = function(p0, callback)
+{
+    DWREngine._execute('/tody/dwr', 'IssueCategoryDwr', 'insertActivity', p0, callback);
+}
+
+IssueCategoryDwr.findCategory = function(p0, callback)
+{
+    DWREngine._execute('/tody/dwr', 'IssueCategoryDwr', 'findCategory', p0, callback);
+}

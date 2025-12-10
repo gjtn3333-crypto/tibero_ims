@@ -1,0 +1,102 @@
+
+function IssueDwr() { }
+
+IssueDwr.setUserService = function(p0, callback)
+{
+    DWREngine._execute('/tody/dwr', 'IssueDwr', 'setUserService', p0, callback);
+}
+
+IssueDwr.setMessageSourceAccessor = function(p0, callback)
+{
+    DWREngine._execute('/tody/dwr', 'IssueDwr', 'setMessageSourceAccessor', p0, callback);
+}
+
+IssueDwr.getSubProjects = function(p0, callback)
+{
+    DWREngine._execute('/tody/dwr', 'IssueDwr', 'getSubProjects', p0, callback);
+}
+
+IssueDwr.getActivityClose = function(p0, callback)
+{
+    DWREngine._execute('/tody/dwr', 'IssueDwr', 'getActivityClose', p0, callback);
+}
+
+IssueDwr.saveTaggingWord = function(p0, p1, p2, callback)
+{
+    DWREngine._execute('/tody/dwr', 'IssueDwr', 'saveTaggingWord', p0, p1, p2, callback);
+}
+
+IssueDwr.getSubHandlers = function(p0, callback)
+{
+    DWREngine._execute('/tody/dwr', 'IssueDwr', 'getSubHandlers', p0, callback);
+}
+
+IssueDwr.getSimpleMailSender = function(callback)
+{
+    DWREngine._execute('/tody/dwr', 'IssueDwr', 'getSimpleMailSender', callback);
+}
+
+IssueDwr.getSubDepartments = function(p0, callback)
+{
+    DWREngine._execute('/tody/dwr', 'IssueDwr', 'getSubDepartments', p0, callback);
+}
+
+IssueDwr.updateCriticalIssue = function(p0, p1, p2, callback)
+{
+    DWREngine._execute('/tody/dwr', 'IssueDwr', 'updateCriticalIssue', p0, p1, p2, callback);
+}
+
+IssueDwr.updateRndPatchDate = function(p0, p1, p2, p3, p4, p5, callback)
+{
+    DWREngine._execute('/tody/dwr', 'IssueDwr', 'updateRndPatchDate', p0, p1, p2, p3, p4, p5, callback);
+}
+
+IssueDwr.updateQaTestEndDate = function(p0, p1, p2, p3, p4, p5, callback)
+{
+    DWREngine._execute('/tody/dwr', 'IssueDwr', 'updateQaTestEndDate', p0, p1, p2, p3, p4, p5, callback);
+}
+
+IssueDwr.updateSiteApplyDate = function(p0, p1, p2, p3, p4, p5, callback)
+{
+    DWREngine._execute('/tody/dwr', 'IssueDwr', 'updateSiteApplyDate', p0, p1, p2, p3, p4, p5, callback);
+}
+
+IssueDwr.updateCompleteYN = function(p0, p1, p2, p3, p4, callback)
+{
+    DWREngine._execute('/tody/dwr', 'IssueDwr', 'updateCompleteYN', p0, p1, p2, p3, p4, callback);
+}
+
+IssueDwr.setIssueService = function(p0, callback)
+{
+    DWREngine._execute('/tody/dwr', 'IssueDwr', 'setIssueService', p0, callback);
+}
+
+IssueDwr.updateScheduleComment = function(p0, p1, p2, p3, p4, callback)
+{
+    DWREngine._execute('/tody/dwr', 'IssueDwr', 'updateScheduleComment', p0, p1, p2, p3, p4, callback);
+}
+
+IssueDwr.approvePatchFile = function(p0, p1, p2, callback)
+{
+    DWREngine._execute('/tody/dwr', 'IssueDwr', 'approvePatchFile', p0, p1, p2, callback);
+}
+
+IssueDwr.approveCancelPatchFile = function(p0, p1, p2, callback)
+{
+    DWREngine._execute('/tody/dwr', 'IssueDwr', 'approveCancelPatchFile', p0, p1, p2, callback);
+}
+
+IssueDwr.approvePatchUrl = function(p0, p1, p2, callback)
+{
+    DWREngine._execute('/tody/dwr', 'IssueDwr', 'approvePatchUrl', p0, p1, p2, callback);
+}
+
+IssueDwr.saveCoreSetApply = function(p0, p1, p2, p3, callback)
+{
+    DWREngine._execute('/tody/dwr', 'IssueDwr', 'saveCoreSetApply', p0, p1, p2, p3, callback);
+}
+
+IssueDwr.setSimpleMailSender = function(p0, callback)
+{
+    DWREngine._execute('/tody/dwr', 'IssueDwr', 'setSimpleMailSender', p0, callback);
+}
