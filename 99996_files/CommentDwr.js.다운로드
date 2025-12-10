@@ -1,0 +1,27 @@
+
+function CommentDwr() { }
+
+CommentDwr.chkDeleteComment = function(p0, p1, callback)
+{
+    DWREngine._execute('/tody/dwr', 'CommentDwr', 'chkDeleteComment', p0, p1, callback);
+}
+
+CommentDwr.deleteCommentAttach = function(p0, p1, p2, callback)
+{
+    DWREngine._execute('/tody/dwr', 'CommentDwr', 'deleteCommentAttach', p0, p1, p2, callback);
+}
+
+CommentDwr.updateCommentFlag = function(p0, p1, p2, callback)
+{
+    DWREngine._execute('/tody/dwr', 'CommentDwr', 'updateCommentFlag', p0, p1, p2, callback);
+}
+
+CommentDwr.setCommentService = function(p0, callback)
+{
+    DWREngine._execute('/tody/dwr', 'CommentDwr', 'setCommentService', p0, callback);
+}
+
+CommentDwr.findCommentDesc = function(p0, p1, callback)
+{
+    DWREngine._execute('/tody/dwr', 'CommentDwr', 'findCommentDesc', p0, p1, callback);
+}

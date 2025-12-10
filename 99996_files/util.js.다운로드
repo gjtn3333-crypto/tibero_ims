@@ -1,0 +1,389 @@
+// dwr.engine.setAsync(false);
+
+
+
+
+Lpad = function(str, len, str2)
+{
+	while(str.length < len)
+	{
+		str = ""+ str2 + str;
+	}
+	return str;
+};
+
+function setValue(vId, vValue)
+{
+	document.getElementById(vId).value = vValue;
+}
+
+function getValue(vId)
+{
+	return document.getElementById(vId).value;
+}
+
+function iniYear(objId){
+	now_date = new Date();
+    year     = now_date.getFullYear();
+    document.getElementById(objId).value = year;
+}
+
+function iniMonth(objId,month){
+	now_date = new Date();
+    year     = now_date.getFullYear();
+    document.getElementById(objId).value = year + "/" + month;
+}
+
+function funcYear(objId, addValue){
+	var objYear =document.getElementById(objId);
+	var yearValue = objYear.value;
+	yearValue = Number(yearValue) + addValue;
+	objYear.value = yearValue;
+}
+
+function funcMonth(objId, addValue, monType)
+{
+	var objMonth =document.getElementById(objId);
+	if(objMonth.value==''){
+		iniMonth(objId, (monType=='start')? '01':'12' );
+	}
+	var yearValue = Number((objMonth.value).substr(0,4));
+	var monthValue = Number((objMonth.value).substr(5,2));
+	monthValue = monthValue + addValue;
+
+	if(monthValue<1){
+		yearValue = yearValue -1;
+		monthValue = 12 + monthValue ;
+	}
+
+	if(monthValue>12){
+		yearValue = yearValue + 1;
+		monthValue = -12 + monthValue ;
+	}
+
+	objMonth.value = yearValue + "/"+ Lpad(String(monthValue),2,'0');
+	alert(objYear.value);
+}
+
+function getTodayDate(){
+	var _date  = new Date();
+	var _year  = _date.getYear();
+	if(_year < 1000){
+		_year += 1900;
+	}
+	var _month = "" + (_date.getMonth() + 1);
+	var _day   = "" + _date.getDate();
+
+	if( _month.length == 1 ) _month = "0" + _month;
+	if( ( _day.length ) == 1 ) _day = "0" + _day;
+
+	var tmp = _year + "/" + _month + "/" + _day;
+	return tmp;
+}
+
+
+
+function bhelp(show, i)
+{
+  if(show){
+     a.style.pixelLeft = event.x;
+     a.style.pixelTop = event.y;
+     a.style.visibility = 'visible';
+  }else{
+     a.style.visibility = 'hidden';
+  }
+
+  document.getElementById("hintMsg").value = form.moduleCode[i].value;
+}
+
+function ignoreEnter(ev)
+{
+   var evCode = (window.netscape) ? ev.which : event.keyCode;
+   if(evCode == 13)
+   {
+   		if(!window.netscape) {event.returnValue = false;}
+   		return false;
+   }
+
+   if(!window.netscape) { event.returnValue = true; }
+
+   return true;
+  /*
+  var evCode = window.event.keyCode;
+  if (evCode == 13) {
+    event.returnValue = false;
+    return;
+  }
+    event.returnValue = true;
+    */
+}
+
+// project검색창
+function setProject(inputForm,inputObj)
+{
+	var projectName = inputObj.value;
+
+	// popup
+	var userName = projectName;
+	var width = 1000;
+	var height = 610;
+	var top  = getY(height);
+	var left   = getX(width);
+	var property = "top=" + top
+		         + ",left=" + left
+		         + ",width=" + width
+		         + ",height=" + height
+		         + ",scrollbars=1,resize=1, status=yes";
+	var ow = window.open("", "popupProjectListWindow", property);
+	var uf = inputForm;
+	uf.action = "ims/issue/popupProjectList.do";
+	uf.target = "popupProjectListWindow";
+	uf.submit();
+}
+
+
+function setOwner(form1, vId, vName)
+{
+    eval("f = "+ form1 +";");
+ 	var userName = document.getElementById(vName).value;
+	if (isNull(userName))
+	{
+		return;
+	}
+	UserDwr.findUsersByName(userName, setOwnerUser);
+}
+
+
+function setEnterOwner(form1, vId, vName, ev)
+{
+    eval("f = "+ form1 +";");
+    document.getElementById(vId).value='';
+//    setValue('bnClickYN','N');
+    ignoreEnter(ev);
+    var evCode = (window.netscape) ? ev.which : event.keyCode;
+    if(evCode==13){ //Enter key
+    	setOwner(form1 , vId, vName);
+    }else if(evCode == 8){	//Back space
+    	document.getElementById(vId).value='';
+	}
+}
+
+function setDisplay(imgObj, elementId, imgObj2, elementId2)
+{
+	var el = document.getElementById(elementId);
+	var viewMode = (el.style.display == "") ? true:false;
+	if (viewMode) {
+		el.style.display = "none";
+		imgObj.src = context + "/images/ims/tab_point.gif";
+	} else {
+		el.style.display = "";
+		imgObj.src = context + "/images/ims/tab_point2.gif";
+	}
+
+	if(imgObj2!=null)
+	{
+		if(!viewMode){
+			var subDiv = document.getElementById(elementId2);
+			subDiv.style.display = "";
+			imgObj2.src = context + "/images/ims/tab_point2.gif";
+		}
+	}
+}
+
+function setDisplay2(imgId, elementId)
+{
+	var imgObj = document.getElementById(imgId);
+	var el = document.getElementById(elementId);
+	var viewMode = (el.style.display == "") ? true:false;
+	if (viewMode) {
+		el.style.display = "none";
+		imgObj.src = context + "/images/ims/tab_point.gif";
+	} else {
+		el.style.display = "";
+		imgObj.src = context + "/images/ims/tab_point2.gif";
+	}
+}
+
+function setDisplay3(obj, elementId)
+{
+	var el = document.getElementById(elementId);
+	var viewMode = (el.style.display == "") ? true:false;
+	if (viewMode) {
+		el.style.display = "none";
+	} else {
+		el.style.display = "";
+	}
+	
+	if(jQuery(obj).find(".link1").hasClass("spread")){
+		jQuery(obj).find(".link1").removeClass("spread");
+		jQuery(obj).find(".link1").addClass("fold");
+	}else{
+		jQuery(obj).find(".link1").removeClass("fold");
+		jQuery(obj).find(".link1").addClass("spread");
+	}
+	
+}
+
+function viewIssue(issueId, menuCode)
+{
+	if (isNull(menuCode)) menuCode = "";
+	jQuery("#load").show();
+	location.href = context + "/ims/issue/issueView.do?issueId=" + issueId + "&amp;menuCode=" + menuCode;
+}
+
+function popupIssueView(issueId)
+{
+		var url = context + "/ims/issue/issueView.do?issueId=" + issueId + "&popYN=Y";
+		var height = "700px";
+		var width = "1000px";
+
+		popupWindow(url, "PopupIssueView" + issueId, width, height, "scrollbars=yes,resizable=yes");
+}
+
+function setUser(nameNid, userName, userId, email, empno)
+{
+    document.getElementById(userName).value = "";
+	document.getElementById(userId).value   = "";
+	if(!isNull(email)) document.getElementById(email).value = "";
+	if(!isNull(empno)) document.getElementById(empno).value = "";
+    var token = nameNid.split(';');
+
+   // alert(token[0]+"; "+token[1]+"; "+token[2]+"; "+ token[3]);
+
+    // 값이 없을 경우
+    if(token[0]=="" || token[0]==null)
+    {
+      token[0] = "";
+      token[1] = "";
+      if(!isNull(email)) token[2] = "";
+      if(!isNull(empno)) token[3] = "";
+    }
+
+	document.getElementById(userName).value = token[0];
+	document.getElementById(userId).value   = token[1];
+	if(!isNull(email)) document.getElementById(email).value   = token[2];
+	if(!isNull(empno)) document.getElementById(empno).value   = token[3];
+}
+
+
+
+// PopupUserList 함수  BEGIN ===========================================
+//  popup user 선택을 위한 전역변수 선언
+var g_formName   = "";
+var g_idField    = "";
+var g_nameField  = "";
+var g_typeField  = "";
+var g_emailField = "";
+var g_empnoField = "";
+function setPopUser(pUserName, setFormName, formName, idField, nameField, typeField, emailField, empnoField)
+{
+	ignoreEnter(document.getElementById(pUserName));
+    if(event.keyCode==13){ //Enter key
+       setPopUser2(pUserName, setFormName, formName, idField, nameField, typeField, emailField, empnoField);
+    }else if(event.keyCode==8 || event.keyCode==46){ // <- key || Delete key
+    	document.getElementById(pUserName).value = "";
+    	document.getElementById(idField).value = "";
+    }
+
+}
+
+
+function setPopUser2(pUserName, setFormName, formName, idField, nameField, typeField, emailField, empnoField)
+{
+	g_formName = formName;
+	g_idField = idField;
+	g_nameField = nameField;
+	g_typeField = isNull(typeField) ? "" : typeField;
+	g_emailField = isNull(emailField) ? "" : emailField;
+	g_empnoField = isNull(empnoField) ? "" : empnoField;
+
+	var userName = document.getElementById(pUserName).value;
+
+	var formNM = "document." + formName;
+	var userForm = eval(formNM);
+	userForm.idField.value = g_idField;
+	userForm.nameField.value = g_nameField;
+	userForm.searchText.value = userName;
+	userForm.formName.value = setFormName;
+
+	if (!isNull(typeField))
+		userForm.typeField.value = g_typeField;
+	if (!isNull(emailField))
+		userForm.emailField.value = g_emailField;
+	if (!isNull(empnoField))
+		userForm.empnoField.value = g_empnoField;
+
+	UserDwr.findUsersByName(userName, setPopUserInfo);
+}
+
+function setPopUserInfo(users)
+{
+	if (users.length == 1) {
+	    document.getElementById(g_nameField).value  = users[0].name;
+	    document.getElementById(g_idField).value    = users[0].id;
+	    if(g_typeField!="") document.getElementById(g_typeField).value  = users[0].managerType;
+	} else {
+		// popup
+		var userName = document.getElementById(g_nameField).value;
+		var width = 668;
+		var height = 480;
+		var top  = getY(height);
+		var left   = getX(width);
+		var property = "top=" + top
+		         + ",left=" + left
+		         + ",width=" + width
+		         + ",height=" + height
+		         + ",scrollbars=1,resize=1,status=yes";
+		var ow = window.open("", "popupUserListWindow", property);
+		var uf = eval("document." + g_formName);
+		uf.target = "popupUserListWindow";
+		uf.submit();
+	}
+}
+// PopupUserList 함수  END ===========================================
+
+
+function textLengthLimit(obj) {
+	var maxLength = parseInt(obj.getAttribute("maxlength"));
+	var st_len = 0;
+	var limitLen = 0;
+	if ( obj.value == null ) return 0;
+
+	for(var i=0;i<obj.value.length;i++){
+        var es_len = escape(obj.value.charAt(i));
+       if ( es_len.length == 1 ) st_len ++;
+       else if ( es_len.indexOf("%u") != -1 ) st_len += 3;
+       else if ( es_len.indexOf("%") != -1 ) st_len += es_len.length/3;
+
+       if(st_len <= maxLength){
+    	   limitLen++;
+       }
+    }
+	if ( st_len  > maxLength ) {
+		alert("Exceed the length of the maximum input.");
+		obj.value = obj.value.substring(0, limitLen);
+	}
+}
+
+function popBlankIssueView(issueId, menuCode) {
+	if ( typeof(issueId) == "undefined" ) {
+		issueId = "";
+	}
+	
+	if ( typeof(menuCode) == "undefined" ) {
+		menuCode = "";
+	}
+
+	var url = context + "/ims/issue/issueView.do?issueId=" + issueId + "&menuCode=" + menuCode;
+	window.open(url, '_blank');
+}
+
+function popDetailUserInfo(userId) {
+	var url = context + "/user/userInfoForm2.do?id="+userId;
+	var width = 650;
+	var height = 250;
+	var top = getY(height);
+	var left = getX(width);
+	var property = "top=" + top + ",left=" + left + ",width=" + width+ ",height=" + height + ",scrollbars=1,resizable=1";
+	var ow = window.open(url, "popupUserFormWindow", property);	
+}

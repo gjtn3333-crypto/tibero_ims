@@ -1,0 +1,73 @@
+// 브라우저 체크
+/*var browserType ="";    
+	if(navigator.userAgent.indexOf("Firefox") > 0) { // Firefox
+		browserType = "Firefox";
+	} else if(navigator.userAgent.indexOf("MSIE 6.0") > 0) { // IE 6.0
+		browserType = "E6";
+	} else if(navigator.userAgent.indexOf("MSIE 7.0") > 0) { // IE 6.0
+		browserType = "E7";	
+	} else {
+		browserType = "ETC";
+	}   
+	*/
+function downloadAttachFile(path, fileName, seqFileName) {
+    // _var = window.open("", 'exceptionPopup','width=500,height=300, toolbar=0,status=0,menubar=no,scrollbars=no,left=140,top=60');
+
+    // Form객체를 만들고 속성값들을 추가함
+    var oForm = document.createElement("<form name=downloadForm></form>");
+
+    oForm.method = "post";
+    //oForm.action = "/util/downAttachFile.jsp";
+    oForm.action = "download";
+
+
+    // TextBox를 생성함
+    var filePath = document.createElement("<input type = hidden  name=filePath    id=filePath>");
+    var originFileName = document.createElement("<input type = hidden  name=fileName    id=fileName>");
+    var realFileName = document.createElement("<input type = hidden  name=seqFileName id=seqFileName>");
+
+    filePath.value = path;
+    originFileName.value = fileName;
+    realFileName.value = seqFileName;
+
+    // Form안에 TextBox를 넣음
+    oForm.appendChild(filePath);
+    oForm.appendChild(originFileName);
+    oForm.appendChild(realFileName);
+
+    // Body안에 Form을 넣음
+    document.body.appendChild(oForm);
+
+    // 해당 Form을 Submit함
+    oForm.submit();
+}
+
+// 기존 다운로드 함수 (사용안함)
+// function downloadFile(path, fileName, seqFileName) {
+//     // Form객체를 만들고 속성값들을 추가함
+//     var oForm = document.getElementById("downloadFileForm");
+//
+//     // TextBox를 생성함
+//     var filePath = oForm.filePath;
+//     var originFileName = oForm.fileName;
+//     var realFileName = oForm.seqFileName;
+//
+//     filePath.value = path;
+//     originFileName.value = fileName;
+//     realFileName.value = seqFileName;
+//
+//     oForm.submit();
+// }
+
+function downloadFileNew(attachId, boardType) {
+    // form 을 가져와서 초기화
+    var oForm = document.getElementById("downloadFileForm");
+
+    var attachIdInput = oForm.attachId;
+    var boardTypeInput = oForm.boardType;
+
+    attachIdInput.value = attachId;
+    boardTypeInput.value = boardType;
+
+    oForm.submit();
+}

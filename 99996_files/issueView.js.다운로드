@@ -1,0 +1,1278 @@
+var techNetProductNm="";
+
+function onload(saveYN, menuCode){
+	if(saveYN == "Y" && menuCode == "issue_regist_form"){
+		alert("This issue saved successfully.");
+	}
+}
+
+document.getElementsByClassName = function(cl) {
+	var retnode = [];
+	var myclass = new RegExp('\\b'+ cl +'\\b');
+	var elem = this.getElementsByTagName('*');
+	for (var i = 0; i < elem.length; i++) {
+		if (myclass.test(elem[i].className)) retnode.push(elem[i]);
+	}
+	return retnode;
+};
+
+function goModifyIssueForm(issueId, menuCode) {
+	if (isNull(menuCode)){
+		menuCode = "";
+	}
+	jQuery("#load").show();
+	location.href = context + "/ims/issue/issueForm.do?issueId=" + issueId + "&amp;menuCode=" + menuCode;
+}
+
+function goCopyIssueForm(issueId, menuCode) {
+	if (isNull(menuCode)){
+		menuCode = "";
+	}
+	
+//	location.href = context + "/ims/issue/issueForm.do?issueId=" + issueId + "&menuCode=" + menuCode + "&issueCopy=Y";
+	var url = context + "/ims/issue/issueForm.do?issueId=" + issueId + "&menuCode=" + menuCode + "&issueCopy=Y";
+	window.open("about:blank").location.href = url;	//새탭으로 띄우기
+}
+
+//Patch Fail 편의 기능 추가
+function goPatchFailForm(issueId, menuCode){
+	if (isNull(menuCode)){
+		menuCode = "";
+	}
+	
+	var url = context + "/ims/issue/issueForm.do?issueId=" + issueId + "&menuCode=" + menuCode + "&issuePatchFail=Y";
+	window.open("about:blank").location.href = url;	//새탭으로 띄우기
+}
+
+/**
+ * issueView 액션 등록버튼 클릭
+ *
+ * @param {} elementId
+ */
+function displayCommentForm(elementId) {
+
+//	var browserType = "";
+//	if (navigator.userAgent.indexOf("Firefox") > 0) { // Firefox
+//		browserType = "Firefox";
+//	} else if (navigator.userAgent.indexOf("MSIE 6.0") > 0) { // IE 6.0
+//		browserType = "E6";
+//	} else if (navigator.userAgent.indexOf("MSIE 7.0") > 0) { // IE 6.0
+//		browserType = "E7";
+//	} else {
+//		browserType = "ETC";
+//	}
+
+	// window.scrollTo(0,0);
+	/*var commDesc = document.getElementById("description").value;
+	if (!isNull(commDesc)) {
+		alert(" There are non-registered datum in action form. \n You have to save the datum. ");
+		return;
+	}
+	*/
+	var el = document.getElementById(elementId);
+
+	document.getElementById("commentId").value = -1;
+	//document.getElementById("description").value = "";
+
+	var viewMode = (el.style.display == "") ? true : false;
+	if (viewMode) {
+		el.style.display = "none";
+	} else {
+		el.style.display = "";
+		moveFocus();
+		//document.getElementById("actionRegMenu").focus();
+		location.hash='nameA';
+	}
+
+}
+
+function moveFocus(){
+	document.getElementById("actionRegMenu").focus();
+}
+
+function deleteIssue(issueId) {
+	var issueNo;
+
+	var temp = prompt(" Are you sure you want to delete this issue? \n then please type issue number. ", "");
+	if(temp != null){
+		issueNo = Number(temp);
+	}else{
+		return;
+	}
+
+	if (!isNaN(issueNo)){
+		if (issueNo == issueId) {
+		//	location.href = context + "/ims/issue/deleteIssue.do?issueId="+ issueId;
+			
+			jQuery.ajax({
+			    url : "ims/issue/deleteIssue.do",
+			    dataType: "json",
+			    type: "POST",
+			    data : {issueId:issueId},
+			    success: function(data, textStatus, jqXHR) {
+			    	if(data.RESULT.ERR_CD == 0){
+			    		alert("This issue deleted successfully.");
+			    	}
+			    	location.href = context + "/ims/issue/issueList.do?CRCheck=N&listType=2";
+			    },
+			    error: function (jqXHR, textStatus, errorThrown)  {
+			    	 var statusCd = "["+jqXHR.status+"][" + textStatus + "][" + errorThrown + "]";
+			    	 alert(statusCd);
+			    },
+			    complete:function(){
+			    }
+			});
+		} else {
+			alert("Issue number miss matched.");
+		}
+	}else{
+		alert("Please type Issue number!");
+	}
+}
+
+function refreshIssueView(issueId) {
+	opener.location.href = context + "/ims/issue/issueView.do?issueId="
+			+ issueId;
+	location.href = context + "/ims/issue/popupUrgent.do?issueId=" + issueId;
+	opener.document.getElementById("ANIMATE").focus();
+}
+
+function processUrgentApprove(degree, appYN, afterYN) {
+	var oForm = document.userListForm;
+	if (degree == 'first') {
+		if (appYN == 'N') {
+			var desc1 = document.getElementById("approveDesc");
+			if (isNull(desc1.value)) {
+				alert("If you want to reject the urgent issue,\nplease type the reason for rejection.");
+				desc1.focus();
+				return;
+			}
+		}
+	} else if (degree == 'second') {
+		if (appYN == 'N') {
+			var desc2 = document.getElementById("finalApproveDesc");
+			if (isNull(desc2.value)) {
+				alert("If you want to reject the urgent issue,\nplease type the reason for rejection.");
+				desc2.focus();
+				return;
+			}
+		} else if (appYN == 'Y') {
+			var solRevDate = document.getElementById("solRevDate");
+			if (solRevDate != null && isNull(solRevDate.value)) {
+				alert("If you want to approve the urgent issue,\nplease enter the expected date for resolution.");
+				solRevDate.focus();
+				return;
+			}
+		}
+	}
+
+	oForm.elements['approveYN'].value = appYN;
+	oForm.elements['afterYN'].value = afterYN;
+	oForm.elements['degree'].value = degree;
+
+	oForm.submit();
+}
+
+function popupProductInstallInfo(projectCode, sitdCode, email) {
+	var width = 750;
+	var height = 450;
+	var top = getY(height);
+	var left = getX(width);
+	var property = "top=" + top + ",left=" + left + ",width=" + width
+			+ ",height=" + height + ",scrollbars=1,resize=1,status=yes";
+
+	//2012.05.31 설치내역 조회
+	var url = context + "/ims/install/installList.do?compCd="+sitdCode+"&prjtCd="+projectCode;
+
+	var approveWin = window.open(url, "INSTALL_INFO_VIEW", property);
+	if (approveWin && approveWin != null) approveWin.focus();
+}
+
+function popupPatchList(projectCode, siteCode, productCode, projectName, siteName) {
+	var width = 750;
+	var height = 450;
+	var top = getY(height);
+	var left = getX(width);
+	var property = "top=" + top + ",left=" + left + ",width=" + width
+			+ ",height=" + height + ",scrollbars=1,resize=1,status=yes";
+
+	var url = context + "/ims/patch/patchList.do?projectCode="+projectCode+"&siteCode="+siteCode+"&productCode="+productCode+"&projectName="+projectName+"&siteName="+siteName;
+
+	var approveWin = window.open(url, "PATCH_LIST_VIEW", property);
+	if (approveWin && approveWin != null) approveWin.focus();
+}
+
+
+
+function popupApprove(issueId) {
+	// var width = 650;
+	var width = 800;
+	var height = 700;
+	var top = getY(height);
+	var left = getX(width);
+	var property = "top=" + top + ",left=" + left + ",width=" + width
+			+ ",height=" + height + ",scrollbars=1,resize=1,status=yes";
+	var url = context + "/ims/issue/popupUrgent.do?issueId=" + issueId;
+	var approveWin = window.open(url, "popupUrgentView", property);
+	if (approveWin && approveWin != null) approveWin.focus();
+}
+
+function popupPatchForm(issueId) {
+	// var width = 650;
+	var width = 820;
+	var height = 450;
+	var top = getY(height);
+	var left = getX(width);
+	var property = "top=" + top + ",left=" + left + ",width=" + width
+			+ ",height=" + height + ",scrollbars=1,resize=1";
+	var url = context + "/ims/issue/patchForm.do?issueId=" + issueId;
+	var patchWin = window.open(url, "popupTestRequestView", property);
+	if (patchWin && patchWin != null) patchWin.focus();
+}
+
+function popupPatchVerification(issueId) {
+	// var width = 650;
+	var width = 800;
+	var height = 850;
+	var top = getY(height);
+	var left = getX(width);
+	var property = "top=" + top + ",left=" + left + ",width=" + width
+	+ ",height=" + height + ",scrollbars=1,resize=1";
+	var today = moment().format("YYYYMMDDHHmmss");
+	var patchVeriWin = window.open("", "popupPatchVerification" + today, property);
+	var uf = document.popupPatchVeriForm;
+	uf.target = "popupPatchVerification" + today;
+	uf.submit();
+}
+
+function popupPatchVerification2(issueId) {
+	// var width = 650;
+	var width = 800;
+	var height = 850;
+	var top = getY(height);
+	var left = getX(width);
+	var property = "top=" + top + ",left=" + left + ",width=" + width
+	+ ",height=" + height + ",scrollbars=1,resize=1";
+	var today = moment().format("YYYYMMDDHHmmss");
+	var patchVeriWin = window.open("", "popupPatchVerification" + today, property);
+	var uf = document.popupPatchVeriForm;
+	uf.issueId.value = issueId;
+	uf.target = "popupPatchVerification" + today;
+	uf.submit();
+}
+
+function popupChangeRequestForm(issueId) {
+	var width = 845;
+	var height = 540;
+	var top = getY(height);
+	var left = getX(width);
+	var property = "top=" + top + ",left=" + left + ",width=" + width
+			+ ",height=" + height + ",scrollbars=1,resizable=1";
+	var url = context + "/ims/request/changeRequestForm.do?issueId=" + issueId;
+	var changeFormWin = window.open(url, "popupChangeRequestForm", property);
+	if (changeFormWin && changeFormWin != null) changeFormWin.focus();
+}
+
+function popupChangeRequestView(issueId) {
+	var width = 700;
+	var height = 800;
+	var top = getY(height);
+	var left = getX(width);
+	var property = "top=" + top + ",left=" + left + ",width=" + width
+			+ ",height=" + height + ",scrollbars=1,resize=1";
+	var url = context + "/ims/request/changeRequestView.do?issueId=" + issueId;
+	var changeViewWin = window.open(url, "popupChangeRequestView", property);
+	if (changeViewWin && changeViewWin != null) changeViewWin.focus();
+}
+
+function popupTestRequestForm(issueId) {
+	var width = 700;
+	var height = 800;
+	var top = getY(height);
+	var left = getX(width);
+	var property = "top=" + top + ",left=" + left + ",width=" + width
+			+ ",height=" + height + ",scrollbars=1,resize=1";
+	var url = context + "/ims/request/testRequestForm.do?issueId=" + issueId;
+	var testFormWin = window.open(url, "popupTestRequestForm", property);
+	if (testFormWin && testFormWin != null) testFormWin.focus();
+}
+
+function popupTestRequestView(issueId) {
+	var width = 700;
+	var height = 800;
+	var top = getY(height);
+	var left = getX(width);
+	var property = "top=" + top + ",left=" + left + ",width=" + width
+			+ ",height=" + height + ",scrollbars=1,resize=1";
+	var url = context + "/ims/request/testRequestView.do?issueId=" + issueId;
+	var testViewWin = window.open(url, "popupTestRequestView", property);
+	if (testViewWin && testViewWin != null) testViewWin.focus();
+}
+
+function qaCommentChanged(){
+	var comment = document.getElementById("qaComment");
+	var newComment = document.getElementById("activityDescription2");
+	
+	if(!isNull(comment) && !isNull(newComment)){
+		comment = comment.innerHTML;
+		newComment = newComment.value;
+		if(comment != newComment){
+			return true;
+		}
+	}
+	
+	return false;
+}
+
+function dealCodeChanged(){
+	var dealCode = document.getElementById("oldDealCode").value;
+	var newDealCode = document.getElementById("dealCode").value;
+
+	if(!isNull(dealCode) && !isNull(newDealCode)){
+		if(dealCode != newDealCode){
+			return true;
+		}
+	}
+	return false;
+}
+
+
+// issueView.jsp에서 상태와 처리자 변경 버튼 클릭시 이벤트처리
+function processIssue(issueManagerId) {
+//	var oForm = document.forms[0];
+	var oForm = document.commentForm;
+	var isChanged = false;
+	var managerName = oForm.managerName.value;
+
+	setNewManager();
+
+	var newActivityId = getComboBoxValue(oForm.activityId);
+	var newResolutionCode = getComboBoxValue(oForm.resolutionCode);
+	var newResolveCode = getComboBoxValue(oForm.resolveCode);
+	var newDealCode = getComboBoxValue(oForm.dealCode);
+	var newExpReopenDate = document.getElementById("expReopenDate").value;
+	var expMainVersionCode = document.getElementById("expMainVersionCode").value;
+	var subVersionCode = document.getElementById("expSubVersionCode").value;
+	var newExpVersCode = (isNull(subVersionCode))
+			? expMainVersionCode
+			: subVersionCode;
+	var oldExpVersCode = document.getElementById("oldExpVersCode").value;
+	var oldExpReopenDate = document.getElementById("oldExpReopenDate").value;
+	var sversionYN = document.getElementById("sversionYN").value;
+
+	var categoryCd = oForm.categoryCode.value;
+	var newManagerId = oForm.managerId.value;
+	var oldActivityId = oForm.oldActivityId.value;
+	var prodCode = oForm.productCode.value;
+	var modCode = oForm.moduleCode.value;
+	var isSystemManager = document.getElementById("isSystemManager").value;
+	var prodModMgrCnt = document.getElementById("prodModMgrCnt").value;
+
+	var preventObj = document.getElementById("preventCode");
+	var preventCode = isNull(preventObj) ? null : preventObj.value;
+
+	if (isNull(issueManagerId) && isNull(newManagerId)) {
+		alert("Cannot find specified handler.\n\nSelect a handler.");
+		return false;
+	}
+
+	if (isNull(newActivityId) && isNull(newResolutionCode)
+			&& isNull(newManagerId) && !dealCodeChanged()
+			&& isNull(resolutionCode) && isNull(newExpReopenDate)
+			&& isNull(newExpVersCode) && isNull(preventCode)) {
+		if(!qaCommentChanged()){	//qa comment가 변경이 있으면 update 가능하도록
+			alert(" No changes were found.\n\n Select the information to modify.");
+			return false;
+		}
+	}
+
+	if (!isNull(newManagerId) && (newManagerId == issueManagerId)) {
+		alert(" The selected handler is the same as the current handler.\n\n Please select another one.");
+		oForm.moduleManagers.focus();
+		return false;
+	}
+
+	// when activity is postpone
+	if (newActivityId == '8' || (isNull(newActivityId) && oldActivityId == '8')) {
+		if (isNull(newExpReopenDate)) {
+			alert(" The status of this issue is postpone.\n\n Please enter the expected date for reopen.");
+			oForm.expReopenDate.focus();
+			return false;
+		}
+
+		if (sversionYN == "Y" && !isNull(expMainVersionCode)) {
+			if (isNull(subVersionCode)) {
+				alert("Please select minor version.");
+				return false;
+			}
+		}
+
+		if (!isNull(newExpReopenDate) && (newExpReopenDate == oldExpReopenDate)) {
+			alert(" The entered date is the same as the current date.\n\n Please enter another one.");
+			oForm.expReopenDate.focus();
+			return false;
+		}
+
+		if (!isNull(newExpVersCode) && (newExpVersCode == oldExpVersCode)) {
+			alert(" The selected version is the same as the current version.\n\n Please select another one.");
+			oForm.expMainVersionCode.focus();
+			return false;
+		}
+
+		document.getElementById("expVersionCode").value = newExpVersCode;
+	}
+
+	if ((newActivityId == '4' || (isNull(newActivityId) && oldActivityId == '4'))
+			&& (categoryCd == 'defect' || categoryCd == 'patchFail')) {
+		var resolveCode = oForm.resolveCode.value;
+		if (isNull(resolveCode)) {
+			if (!errorMessage(oForm.resolveCode, "To set the issue to resolved, please specify details of bug")) {
+				return false;
+			}
+		}
+	}
+
+	if (newActivityId == '7' || (isNull(newActivityId) && oldActivityId == '7')) {
+		var resolutionCode = oForm.resolutionCode.value;
+		if (isNull(resolutionCode)) {
+			if (!errorMessage(oForm.resolutionCode, "To reject an issue, please provide a reason.")) {
+				return false;
+			}
+		}
+	}
+
+	var prodModMgrCnt = document.getElementById("prodModMgrCnt").value;
+	if ((newActivityId == '5' || newActivityId == '29') && isNull(newDealCode) && prodModMgrCnt != '0') {
+		if (categoryCd == 'defect' || categoryCd == 'patchFail') {
+			alert("To close an issue, please select Type to handle.");
+			return false;
+		}
+		if (categoryCd == 'inquiry') {
+			alert("To close an issue, please select Technical Inquiry -> Contents Tag Type.");
+			return false;
+		}
+		// oForm.dealCode.focus();
+	}
+
+	var manType = oForm.manType.value;
+	var oldManType = oForm.oldManType.value;
+	var dealManType = oForm.dealManType.value;
+
+	var isSystemManager = document.getElementById("isSystemManager").value;
+	if (isSystemManager != 'true') {
+//		if ((newActivityId == '3' || (isNull(newActivityId) && oldActivityId == '3'))
+//				&& ((isNull(manType) && dealManType == 'Q') || manType == 'Q')) {
+//			alert("Assigned issues cannot be assigned QA.");
+//			return false;
+//		}
+//		if ((newActivityId == '4' || (isNull(newActivityId) && oldActivityId == '4'))
+//				&& ((isNull(manType) && dealManType == 'R') || manType == 'R')) {
+//			alert("Resolved issues cannot be assigned to developers.");
+//			return false;
+//		}
+		if (newActivityId != oldActivityId
+				&& (newActivityId == '2' || newActivityId == '5' || newActivityId == '29')) {
+			// if(pdeptCode!='qa')
+			if (prodModMgrCnt == '0') {
+				// Open이나 Close로의 상태변경은 제품모듈 담당자만 가능합니다.
+				if (!errorMessage(oForm.activityId,
+						"Sorry, only QA members are allowed to set issues to Open or Close.")) {
+					return false;
+				}
+			}
+		}
+	}
+
+//	if (document.getElementById("mailToIH").length <= 0) {
+//			alert("To send email, please provide at least one reciepient in the To field. ");
+//			return false;
+//	}
+
+//	if (!confirm("Would you like to change the issue information?")) {
+//		return false;
+//	}
+
+//	allCheckIn(document.getElementById("mailToIH"));
+//	allCheckIn(document.getElementById("mailCcIH"));
+
+	return true;
+}
+
+/**
+ * issueView화면에서 상태셀렉트박스에서 상태를 변경하면 입력값들의 표시 여부 설정
+ * - 현재는 사용하지 않는것으로 한다.
+ *
+ * @param {} activityId
+ */
+function setResolution(activityId) {
+
+	var oForm = document.commentForm;
+	var RejectTr = document.getElementById("RejectTr");
+	var categoryCd = document.getElementById("categoryCode").value;
+	var pdeptCd = document.getElementById("pdeptCode").value;
+	var oldActivityId = document.getElementById("oldActivityId").value;
+	var activityId = document.getElementById("activityId").value;
+
+	// var isSystemManager = document.getElementById("isSystemManager").value;
+	var prodModMgrCnt = document.getElementById("prodModMgrCnt").value;
+	var closeReq = "N";
+	var cateYn = "N";
+	if (categoryCd == 'defect'  || categoryCd == 'patchFail' || categoryCd == 'inquiry')
+		cateYn = "Y";
+	if (prodModMgrCnt != '0')
+		closeReq = "Y";
+
+	var CloseDealTr = document.getElementById("CloseDealTr");
+	var PreventCTr = document.getElementById("PreventCTr");
+	var CloseDesc = document.getElementById("activityDescription2");
+	var dealCode = document.getElementById("dealCode");
+	var CloseDealTd = document.getElementById("CloseDealTd");
+	var CloseDescTd = document.getElementById("CloseDescTd");
+	var resolutionCode = document.getElementById("resolutionCode");
+	var activityDescription = document.getElementById("activityDescription");
+	var curCode = document.getElementById("curCode").value;
+	//ims 지식화 추가 : 2012-08
+	var kmsSatus = document.getElementById("kmsSatus");
+	var kmsBtn = document.getElementById("kmsBtn");
+	var isQaModuleManagerCheck = document.getElementById("isQaModuleManagerCheck").value;
+	var isSystemManagerCheck = document.getElementById("isSystemManagerCheck").value;
+
+	// close관련 설정 (close 상태 선택 시 RND는 KMS지식화 버튼 보이지 않음)
+	if (activityId == '5' || (isNull(activityId) && oldActivityId == '5') || activityId == '29' || (isNull(activityId) && oldActivityId == '29')) {
+		// close
+		CloseDealTr.style.display = "";
+		kmsSatus.style.display = "";
+		kmsBtn.style.display = "none";
+		if(isQaModuleManagerCheck == "true" || isSystemManagerCheck == "true"){
+			kmsBtn.style.display = "";
+		}
+	} else {
+		CloseDealTr.style.display = "none";
+		document.getElementById("dealCode").value = "";
+		kmsSatus.style.display = "none";
+		kmsBtn.style.display = "none";
+	}
+
+	// 이슈카테고리가 결함, 기술문의일때 close관련코드 selectBox visible속성 설정
+	if (cateYn == 'Y') {
+		if (closeReq == 'Y') {
+			dealCode.style.display = "";
+			dealCode.disabled = false;
+			CloseDealTd.style.display = "";
+			CloseDescTd.colspan = '2';
+		} else {
+			CloseDealTd.style.display = "none";
+			CloseDealTd.disabled = true;
+			CloseDescTd.colspan = '3';
+		}
+	} else {
+		CloseDealTd.style.display = "none";
+	}
+
+	// reject관련 설정
+	if (activityId == '7' || (isNull(activityId) && oldActivityId == '7')) {
+		// reject
+		RejectTr.style.display = "";
+		if (activityDescription && activityDescription != null) {
+			resolutionCode.disabled = false;
+		}
+	} else {
+		RejectTr.style.display = "none";
+		resolutionCode.disabled = true;
+		resolutionCode.options[0].selected = true;
+//		resolutionCode.value = "";
+	}
+
+	// Resolved관련 설정
+	if (activityId == '4' || (isNull(activityId) && oldActivityId == '4')) {
+		if (categoryCd == 'defect' || categoryCd == 'patchFail') {
+			ResolveTr.style.display = "";
+		}
+	} else {
+		ResolveTr.style.display = "none";
+		document.getElementById("resolveCode").value = "";
+	}
+
+	// postpone관련설정
+	if (activityId == '8' || (isNull(activityId) && oldActivityId == '8')) {
+		PostponeTr.style.display = "";
+		ReopenDateTr.style.display = "";
+	} else {
+		PostponeTr.style.display = "none";
+		ReopenDateTr.style.display = "none";
+		document.getElementById("expVersionCode").value = "";
+		document.getElementById("expMainVersionCode").value = "";
+		document.getElementById("expSubVersionCode").value = "";
+		document.getElementById("expReopenDate").value = "";
+	}
+
+	// close나 reject일때 처리자 설정 selectBox invisible설정
+	if (oldActivityId == '5' || oldActivityId == '7' || activityId == '5'
+			|| activityId == '7' || oldActivityId == '29' || activityId == '29') {
+		MgrTr.style.display = "none";
+		document.getElementById("managerId").value = "";
+	} else {
+		MgrTr.style.display = "";
+	}
+
+	if (activityId == 9) {
+		PreventPTr.style.display = "";
+	} else {
+		PreventPTr.style.display = "none";
+	}
+	
+	if (activityId == 29) {
+		ClosePTr.style.display = "";
+	} else {
+		ClosePTr.style.display = "none";
+	}
+	
+	if(activityId == 3){
+		detailActivityTD.style.display = "";
+	} else {
+		detailActivityTD.style.display = "none";
+	}
+
+	// 상태SelectBox에서 값선택후 null값을 선택한 경우 초기값으로 세팅한다.
+	if (isNull(activityId)) {
+		if (oldActivityId == '4')
+			oForm.resolveCode.value = curCode;
+		if (oldActivityId == '5' || oldActivityId == '29')
+			oForm.dealCode.value = curCode;
+		if (oldActivityId == '7')
+			oForm.resolutionCode.value = curCode;
+	}
+
+	//activity name setting
+	var vActivityName = jQuery("#activityId option:selected").text();
+	jQuery("#activityName").val(vActivityName);
+}
+
+function setManagerId(managerId) {
+	document.getElementById("managerId").value = managerId.substr(1, managerId.length);
+	document.getElementById("managerName").value = "";
+	document.getElementById("manType").value = managerId.substr(0, 1);
+
+	//manger name setting
+	var vManagerName = jQuery("#moduleManagers option:selected").text().trim();
+	var idx = vManagerName.indexOf("[");
+	if(idx > 0){
+		vManagerName = vManagerName.substr(0, idx);
+	}
+	jQuery("#newManagerName").val(vManagerName);
+}
+
+function setNewManager() {
+	var userName = document.getElementById("managerName").value;
+	if (isNull(userName)) {
+		return;
+	}
+	UserDwr.findUsersByName(userName, setNewManagerInfo);
+}
+
+function setNewManagerInfo(users) {
+	if (isNull(users)) {
+	} else {
+		// var f = document.processForm;
+		if (users.length == 1) {
+			document.getElementById("managerName").value = users[0].name;
+			document.getElementById("newManagerName").value = users[0].name;
+			document.getElementById("managerId").value = users[0].id;
+			document.getElementById("manType").value = users[0].managerType;
+		} else {
+			// popup
+			document.getElementById("newManagerName").value = '';
+			var userName = document.getElementById("managerName").value;
+			var width = 780;
+			var height = 480;
+			var top = getY(height);
+			var left = getX(width);
+			var property = "top=" + top + ",left=" + left + ",width=" + width
+					+ ",height=" + height + ",scrollbars=1,resize=1";
+			var ow = window.open("", "popupUserListWindow", property);
+			var uf = document.popupUserListForm;
+				uf.idField.value = "managerId";
+				uf.nameField.value = "managerName";
+				uf.typeField.value = "manType";
+				uf.searchText.value = userName;
+				uf.target = "popupUserListWindow";
+				uf.submit();
+		}
+	}
+}
+
+function setExpSubVersion(mainVersionCode, systemCode, userId) {
+	ProductDwr.findSearchSubVersions($("productCode").value, systemCode, userId,
+			mainVersionCode, listMainVersionProcess2);
+}
+
+function listMainVersionProcess2(expSubVersions) {
+	var versionCombo = $("expSubVersionCode");
+	var oForm = document.commentForm;
+
+	DWRUtil.removeAllOptions(versionCombo);
+	DWRUtil.addOptions("expSubVersionCode", new Array({
+						versionCode : "",
+						versionName : "::: select :::"
+					}), "versionCode", "versionName");
+	DWRUtil.addOptions(versionCombo, expSubVersions, "versionCode",
+			"versionName");
+
+	if (!isNull(expSubVersions) && expSubVersions.length > 0) {
+		versionCombo.style.display = "";
+		oForm.elements['sversionYN'].value = "Y"
+	} else {
+		versionCombo.style.display = "none";
+		oForm.elements['sversionYN'].value = "N"
+	}
+}
+
+//action 등록시 체크 : 사용X
+function submitCommentForm(pForm) {
+	var mailFlag = getRadioBoxValue(pForm.elements['mailFlag']);
+	var chkMailYn = document.getElementById("chkMailYn").value;
+
+	if (mailFlag == "Y" && chkMailYn != "Y") {
+		if (document.getElementById("mailTo").length <= 0) {
+			alert("To send email, please provide at least one reciepient in the To field. ");
+			return false;
+		}
+	}
+
+	var is32IE = document.getElementById("is32IE").value;
+	if (is32IE == 'Y') {
+		/* Tagfree Editor */
+		//디자인 탭에서 처리(HTML, 미리보기에서 저장 버그)
+		pForm.twe.ActiveTab = 1;
+
+		var strMime = document.twe.MimeValue();
+		var strBody = document.twe.BodyValue();
+
+		pForm.mime_contents.value = strMime;
+		pForm.html_contents.value = strBody;
+		if(document.twe.TextValue() == ''){
+			alert("Please enter the action details.");
+			document.twe.SetFocus();
+			return false;
+		}
+		/* Tagfree Editor */
+	} else {
+		/* X-free Editor */
+		//디자인 탭에서 처리(HTML, 미리보기에서 저장 버그)
+		if (xfe.getTextValue() == '\n') {
+			alert("Please enter the action details.");
+			return false;
+		}
+		pForm.xcontents.value = xfe.getBodyValue();		// 실제contents 내용
+	}
+
+	if (confirm("Would you like to register an action?")) {
+		allCheckIn(document.getElementById("mailTo"));
+		allCheckIn(document.getElementById("mailCc"));
+		return true;
+	} else {
+		return false;
+	}
+}
+
+function processPatchApprove() {
+	return confirm("Has the patch file been verified?");
+}
+
+function setAttachApprove(attachId) {
+	document.getElementById("attachId").value = attachId;
+}
+
+function updateCommentForm(elementId, commentId, issueId) {
+	var el = document.getElementById(elementId);
+
+	document.getElementById("commentId").value = commentId;
+	document.getElementById("issueId").value = issueId;
+
+	var viewMode = (el.style.display == "") ? true : false;
+	if (viewMode) {
+		el.style.display = "none";
+	} else {
+		el.style.display = "";
+	}
+	CommentDwr.findCommentDesc(issueId, commentId, updateCommDesc);
+}
+
+function updateCommentForm2(elementId, commentId, issueId) {
+	var el = document.getElementById(elementId);
+
+	document.getElementById("commentId").value = commentId;
+	document.getElementById("issueId").value = issueId;
+
+	el.style.display = "";
+	var position = jQuery("#"+elementId).offset();
+    jQuery('html, body').animate({scrollTop : position.top}, 500);
+    jQuery(".handling").css("display", "none");
+
+    jQuery("#actionTableImg").attr("src", context + "/images/ims/tab_point2.gif");
+	jQuery("#actionTable").show();
+
+	actionRegShow();
+
+	CommentDwr.findCommentDesc(issueId, commentId, updateCommDesc);
+}
+
+function updateCommDesc(Comment) {
+	var is32IE = document.getElementById("is32IE").value;
+	if (is32IE == 'Y') {
+		var form = document.commentForm;
+		form.twe.HtmlValue = Comment.description;
+	} else {
+		/* X-free Editor */
+		xfe.setHtmlValue(Comment.description);
+		/* X-free Editor */
+	}
+
+	var chkFlag1 = document.getElementById("chkFlag1");
+	var chkFlag2 = document.getElementById("chkFlag2");
+	if (Comment.chkFlag == "Y") {
+		chkFlag1.checked = true;
+	} else {
+		chkFlag2.checked = true;
+	}
+}
+
+function fn_deleteCommentAttach(pIssueId, pCommId, pAttachId) {
+	if (confirm("Are you sure you want to delete the selected file?")) {
+		jQuery("#load").show();
+		document.getElementById("issueId").value = pIssueId;
+		document.getElementById("commentId").value = pCommId;
+		CommentDwr.deleteCommentAttach(pIssueId, pCommId, pAttachId, fn_deleteCommentAttachMsg);
+	}
+}
+
+function fn_deleteCommentAttachMsg(pDelCnt) {
+	if (pDelCnt > 0) {
+		location.reload();
+	} else {
+		alert('Oops! Failed to delete file.');
+	}
+	jQuery("#load").hide();
+
+//	for (var data in attaches) {
+//		var d = document.createElement("div");
+//		var t = document.createTextNode(messages.data);
+//		d.appendChild(t);
+//		g_oCommentAttachDiv.insertBefore(d, g_oCommentAttachDiv.firstChild);
+//	}
+//	DWREngine.setActiveReverseAjax(true);
+//
+//	alert(g_oCommentAttachDiv.id);
+//	alert(comment);
+//
+//	DWRUtil.setValues(g_oCommentAttachDiv.id, comment);
+}
+
+function processIssueViewChk() {
+	document.getElementById("listTypeParam").value = "listType=6&CRCheck=N";
+	return confirm("Do you want to modify the issue tracking configuration?");
+}
+
+function processIssueMonitoringUpdate() {
+	var myform = jQuery("#processForm2");
+	jQuery("#listTypeParam").val("listType=6&CRCheck=N");
+	if(confirm("Do you want to modify the issue tracking configuration?")){
+		jQuery("#load").show();
+		myform.submit();		
+	}
+}
+
+// allCheckIn
+function allCheckIn(dest) {
+	for (var i = 0; i < dest.length; i++) {
+		dest.options[i].selected = true;
+	}
+}
+
+/**
+ * 해당 이슈의 각 액션에 대한 중요도 체크 시 액션
+ * - 중요성 체크 여부 저장
+ * - DWR Ajax Action (com.tmax.tody.dwr.ims.CommentDwr - updateCommentFlag)
+ *
+ * @param {} issueId
+ * @param {} commentId
+ * @param {} seq
+ * @param {} mgrChkObj
+ */
+function commentFlagChg(issueId, commentId, seq, mgrChkObj) {
+	var cFlag = document.getElementsByName("commentFlag");
+	var commentFlag = cFlag[seq].value == "Y" ? "N" : "Y";
+	var mgrChkVal = document.getElementById(mgrChkObj).value;
+	var commDescTR = document.getElementsByClassName("commDescTR");
+	var smallCheck = document.getElementsByName("chkFlagA");
+
+	if (mgrChkVal == "Y") {
+		if (commentFlag == "Y") {
+			commDescTR[seq].style.display = "";
+		} else {
+			commDescTR[seq].style.display = "none";
+		}
+	} else {
+		commDescTR[seq].style.display = "";
+	}
+	CommentDwr.updateCommentFlag(issueId, commentId, commentFlag,
+			afterUpdateCommentFlag);
+}
+
+/**
+ * 해당 이슈의 각 액션에 대한 중요도 체크 저장(commentFlagChg) 후 결과
+ *
+ * @param {} commentId
+ */
+function afterUpdateCommentFlag(commentId) {
+	if (commentId > 0) {
+		var cFlag = document.getElementsByName("commentFlag");
+		var actionId = document.getElementsByName("actionId");
+		for (var i = 0; i < cFlag.length; i++) {
+			if (actionId[i].value == commentId) {
+				cFlag[i].value = cFlag[i].value == "Y" ? "N" : "Y";
+				return;
+			}
+		}
+	} else {
+		alert("Oops! Failed to update comment flag.");
+	}
+}
+
+/**
+ * Only important action 체크 시 액션
+ *
+ * @param {} mgrChkObj
+ */
+function commentFlagMgr(mgrChkObj) {
+	var mgrChkVal = document.getElementById(mgrChkObj);
+	if (mgrChkVal.value == "Y") {
+		mgrChkVal.value = "N";
+	} else {
+		mgrChkVal.value = "Y";
+	}
+
+	var commentFlag = document.getElementsByName("commentFlag");
+	var commDescTR = document.getElementsByClassName("commDescTR");
+
+	if (mgrChkVal.value == "Y") {
+		for (i = 0; i < commentFlag.length; i++) {
+			if (commentFlag[i].value == "Y") {
+				commDescTR[i].style.display = "";
+			} else {
+				commDescTR[i].style.display = "none";
+			}
+		}
+	} else {
+		for (i = 0; i < commentFlag.length; i++) {
+			commDescTR[i].style.display = "";
+		}
+	}
+}
+
+function goKmsFrom(issueId, productName,status) {
+	//2014.01.05 이용승 신테크넷 제품명 vali 체크 로직 추가 START
+	techNetProductNm = productName;
+	ServiceDwr.findProduct(checkTechNetProduct);
+	//2014.01.05 이용승 신테크넷 제품명 vali 체크 로직 추가 END
+}
+
+//신테크넷에 등록되어있는 제품인지 체크
+function checkTechNetProduct(list){
+	var TechNetProductYN = false;
+	//기존 AnyLink 제품은 T로 AnyLink Over ProBus는 P로 변경함
+	if(techNetProductNm == "AnyLink"){
+		techNetProductNm = "AnyLinkT";
+	}else if(techNetProductNm == "AnyLink Over ProBus"){
+		techNetProductNm = "AnyLinkP";
+	}
+
+	//module_srl
+	if(techNetProductNm.indexOf("OpenFrame") > -1
+			|| techNetProductNm.indexOf("ProCobol") > -1 || techNetProductNm.indexOf("ProSort") > -1
+			|| techNetProductNm.indexOf("ProTrieve") > -1 || techNetProductNm.indexOf("ProTrieveMF") > -1
+			|| techNetProductNm.indexOf("Tibero HiDB") > -1){
+		techNetProductNm = "OpenFrame";
+	}
+
+	for(var i=0; i < list.length; i++){
+		if(techNetProductNm.toLowerCase() == list[i].product_nm.toLowerCase()){
+			TechNetProductYN = true;
+			regKss();
+			return;
+		}
+	}
+
+	if(!TechNetProductYN){
+		alert("테크넷 KSS에 등록할수없는 제품입니다. ");
+		return;
+	}
+}
+
+function regKss(){
+	if(confirm("Would you like to IMS Intellectualization?")){
+		document.getElementById("imsToKms").value = "true";
+
+		if(status == "insert"){
+			document.getElementById("toKmsYn").checked = "true";
+			document.getElementById("toKmsYn").value = "Y";
+		}
+		jQuery("#load").show();
+		document.commentForm.submit();
+	}
+}
+
+function goKmsCancleFrom(){
+	var cform = document.getElementById("kmsCancleForm");
+
+	if(confirm("KSS is changes to the standby state.\nTo delete KSS data from the website visit.\nWould you like to cancel?")){
+		jQuery("#load").show();
+		cform.submit();
+	}
+
+}
+
+function editTaggingWord(){
+	jQuery("#spanTaggingWord").css("display", "none");
+	jQuery("#taggingWord").css("display", "");
+	jQuery("#editTagginWordBtn").css("display", "none");
+	jQuery("#saveTagginWordBtn").css("display", "");
+	jQuery("#cancelTagginWordBtn").css("display", "");
+}
+
+function cancelTaggingWord(taggingWord){
+	jQuery("#spanTaggingWord").css("display", "");
+	jQuery("#taggingWord").css("display", "none");
+	jQuery("#taggingWord").val(taggingWord);
+	jQuery("#editTagginWordBtn").css("display", "");
+	jQuery("#saveTagginWordBtn").css("display", "none");
+	jQuery("#cancelTagginWordBtn").css("display", "none");
+}
+
+function saveTaggingWord(issueId, userId) {
+	var taggingWord = document.getElementById("taggingWord").value;
+	if (taggingWord == null) {
+		return;
+	}
+	IssueDwr.saveTaggingWord(issueId, taggingWord, userId, setTaggingWord);
+}
+
+function setTaggingWord(data){
+	jQuery("#spanTaggingWord").text(data);
+	cancelTaggingWord(data);
+}
+
+//날짜 필드 수정 관련
+function editDateField(elementId){
+	jQuery("#" + elementId + "Span").css("display", "none");
+	jQuery("#" + elementId + "SpanInput").css("display", "");
+	jQuery("#" + elementId + "EditBtn").css("display", "none");
+	jQuery("#" + elementId + "SaveBtn").css("display", "");
+	jQuery("#" + elementId + "CancelBtn").css("display", "");
+}
+
+function cancelDateField(elementId, date){
+	jQuery("#" + elementId + "Span").css("display", "");
+	jQuery("#" + elementId + "SpanInput").css("display", "none");
+	jQuery("#" + elementId).val(date);
+	jQuery("#" + elementId + "EditBtn").css("display", "");
+	jQuery("#" + elementId + "SaveBtn").css("display", "none");
+	jQuery("#" + elementId + "CancelBtn").css("display", "none");
+}
+
+function saveDateField(issueId, userId, num) {
+	var vDate = '';
+	var vOldDate = '';
+
+	var mailTo = [];
+	var mailCc = [];
+	jQuery("#mailTo option").each(function() {
+		mailTo.push((jQuery(this)).val());
+	});
+		
+	jQuery("#mailCc option").each(function() {
+		mailCc.push((jQuery(this)).val());
+	});
+		
+	if(num == '1'){
+		vOldDate = jQuery("#oldRndPatchDate").val();
+		vDate = jQuery("#rndPatchDate").val();
+		if(vOldDate == vDate){
+			setRndPatchDate(vDate);
+		}else{
+			IssueDwr.updateRndPatchDate(issueId, userId, vOldDate, vDate, mailTo, mailCc, setRndPatchDate);
+		}
+	}else if(num == '2'){
+		vOldDate = jQuery("#oldQaTestEndDate").val();
+		vDate = jQuery("#qaTestEndDate").val();
+		if(vOldDate == vDate){
+			setQaTestEndDate(vDate);
+		}else{
+			IssueDwr.updateQaTestEndDate(issueId, userId, vOldDate, vDate, mailTo, mailCc, setQaTestEndDate);
+		}
+	}else if(num == '3'){
+		vOldDate = jQuery("#oldSiteApplyDate").val();
+		vDate = jQuery("#siteApplyDate").val();
+		if(vOldDate == vDate){
+			setSiteApplyDate(vDate);
+		}else{
+			IssueDwr.updateSiteApplyDate(issueId, userId, vOldDate, vDate, mailTo, mailCc, setSiteApplyDate);
+		}
+	}
+}
+
+function saveCompleteYN(issueId, userId, flagNo) {
+	var vCompleteYN = '';
+	var vOldCompleteYN = '';
+	
+	if(flagNo == '1'){
+		vOldCompleteYN = jQuery("#oldRndCompleteYN").val();
+		vCompleteYN = jQuery("#rndCompleteYN").prop("checked") ? "Y" : "N";
+		if(vOldCompleteYN == vCompleteYN){
+			setRndCompleteYN(vCompleteYN);
+		}else{
+			vCompleteYN = IssueDwr.updateCompleteYN(issueId, userId, vOldCompleteYN, vCompleteYN, flagNo, setRndCompleteYN);
+		}
+	}else if(flagNo == '2'){
+		vOldCompleteYN = jQuery("#oldQaCompleteYN").val();
+		vCompleteYN = jQuery("#qaCompleteYN").prop("checked") ? "Y" : "N";
+		if(vOldCompleteYN == vCompleteYN){
+			setQaCompleteYN(vCompleteYN);
+		}else{
+			vCompleteYN = IssueDwr.updateCompleteYN(issueId, userId, vOldCompleteYN, vCompleteYN, flagNo, setQaCompleteYN);
+		}
+	}else if(flagNo == '3'){
+		vOldCompleteYN = jQuery("#oldPsCompleteYN").val();
+		vCompleteYN = jQuery("#psCompleteYN").prop("checked") ? "Y" : "N";
+		if(vOldCompleteYN == vCompleteYN){
+			setPsCompleteYN(vCompleteYN);
+		}else{
+			vCompleteYN = IssueDwr.updateCompleteYN(issueId, userId, vOldCompleteYN, vCompleteYN, flagNo, setPsCompleteYN);
+		}
+	}
+}
+
+function saveScheduleComment(issueId, userId, flagNo) {
+	var vScheduleComment = '';
+	var vOldScheduleComment = '';
+
+	if(flagNo == '1'){
+		vOldScheduleComment = jQuery("#oldRndScheduleComment").val();
+		vScheduleComment = jQuery("#rndScheduleComment").val();
+		if(vOldScheduleComment == vScheduleComment){
+			setRndScheduleComment(vScheduleComment);
+		}else{
+			vScheduleComment = IssueDwr.updateScheduleComment(issueId, userId, vOldScheduleComment, vScheduleComment, flagNo, setRndScheduleComment);
+		}
+	}else if(flagNo == '2'){
+		vOldScheduleComment = jQuery("#oldQaScheduleComment").val();
+		vScheduleComment = jQuery("#qaScheduleComment").val();
+		if(vOldScheduleComment == vScheduleComment){
+			setQaScheduleComment(vScheduleComment);
+		}else{
+			vScheduleComment = IssueDwr.updateScheduleComment(issueId, userId, vOldScheduleComment, vScheduleComment, flagNo, setQaScheduleComment);
+		}
+	}else if(flagNo == '3'){
+		vOldScheduleComment = jQuery("#oldPsScheduleComment").val();
+		vScheduleComment = jQuery("#psScheduleComment").val();
+		if(vOldScheduleComment == vScheduleComment){
+			setPsScheduleComment(vScheduleComment);
+		}else{
+			vScheduleComment = IssueDwr.updateScheduleComment(issueId, userId, vOldScheduleComment, vScheduleComment, flagNo, setPsScheduleComment);
+		}
+	}
+}
+
+function setRndPatchDate(data){
+	jQuery("#rndPatchDateSpan").text(data);
+	jQuery("#oldRndPatchDate").val(jQuery("#rndPatchDate").val());	
+	cancelDateField("rndPatchDate", data);
+}
+
+function setQaTestEndDate(data){
+	jQuery("#qaTestEndDateSpan").text(data);
+	jQuery("#oldQaTestEndDate").val(jQuery("#qaTestEndDate").val());	
+	cancelDateField("qaTestEndDate", data);
+}
+
+function setSiteApplyDate(data){
+	jQuery("#siteApplyDateSpan").text(data);
+	jQuery("#oldSiteApplyDate").val(jQuery("#siteApplyDate").val());	
+	cancelDateField("siteApplyDate", data);
+}
+
+function setRndCompleteYN(data){
+	jQuery("#rndCompleteYNSpan").text(data);
+	jQuery("#oldRndCompleteYN").val(jQuery("#rndCompleteYN").val());	
+	cancelDateField("rndCompleteYN", data);
+}
+
+function setQaCompleteYN(data){
+	jQuery("#qaCompleteYNSpan").text(data);
+	jQuery("#oldQaCompleteYN").val(jQuery("#qaCompleteYN").val());	
+	cancelDateField("qaCompleteYN", data);
+}
+
+function setPsCompleteYN(data){
+	jQuery("#psCompleteYNSpan").text(data);
+	jQuery("#oldPsCompleteYN").val(jQuery("#psCompleteYN").val());	
+	cancelDateField("psCompleteYN", data);
+}
+
+function setRndScheduleComment(data){
+	jQuery("#rndScheduleCommentSpan").text(data);
+	jQuery("#oldRndScheduleComment").val(jQuery("#rndScheduleComment").val());	
+	cancelDateField("rndScheduleComment", data);
+}
+
+function setQaScheduleComment(data){
+	jQuery("#qaScheduleCommentSpan").text(data);
+	jQuery("#oldQaScheduleComment").val(jQuery("#qaScheduleComment").val());	
+	cancelDateField("qaScheduleComment", data);
+}
+
+function setPsScheduleComment(data){
+	jQuery("#psScheduleCommentSpan").text(data);
+	jQuery("#oldPsScheduleComment").val(jQuery("#psScheduleComment").val());	
+	cancelDateField("psScheduleComment", data);
+}
+//Coreset apply 관련
+function editCoreSetApplyField(){
+	jQuery(".coreSetApplySpan").css("display", "none");
+	jQuery(".coreSetApplySpanInput").css("display", "");
+	jQuery("#coreSetApplyEditBtn").css("display", "none");
+	jQuery("#coreSetApplySaveBtn").css("display", "");
+	jQuery("#coreSetApplyCancelBtn").css("display", "");
+}
+
+function cancelCoreSetApplyField(data){
+	jQuery(".coreSetApplySpan").css("display", "");
+	jQuery(".coreSetApplySpanInput").css("display", "none");
+	jQuery("#coreSetApplyEditBtn").css("display", "");
+	jQuery("#coreSetApplySaveBtn").css("display", "none");
+	jQuery("#coreSetApplyCancelBtn").css("display", "none");
+	jQuery("#coreSetApplyVersion").val(data);
+}
+
+function saveCoreSetApplyField(issueId, userId) {
+	var coreSetApplyCode = jQuery("#coreSetApplyCode").val();
+	var coreSetApplyVersion = jQuery("#coreSetApplyVersion").val().trim();
+	IssueDwr.saveCoreSetApply(issueId, coreSetApplyCode, coreSetApplyVersion, userId, setCoreSetApply);
+}
+
+function setCoreSetApply(data){
+	var vCoresetApply = '';
+	var vCoreSetApplyVersion = '';
+	
+	if(data.coreSetApplyName){
+		vCoresetApply = data.coreSetApplyName;
+	}
+	
+	if(data.coreSetApplyVersion){
+		vCoreSetApplyVersion = data.coreSetApplyVersion;
+	}
+	
+	jQuery("#coreSetApplyNameSpan").text(vCoresetApply);
+	jQuery("#coreSetApplyVersionSpan").text(vCoreSetApplyVersion);
+	cancelCoreSetApplyField(vCoreSetApplyVersion);
+}

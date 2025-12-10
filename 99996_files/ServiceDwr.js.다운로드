@@ -1,0 +1,22 @@
+
+function ServiceDwr() { }
+
+ServiceDwr.findProduct = function(callback)
+{
+    DWREngine._execute('/tody/dwr', 'ServiceDwr', 'findProduct', callback);
+}
+
+ServiceDwr.getKssService = function(callback)
+{
+    DWREngine._execute('/tody/dwr', 'ServiceDwr', 'getKssService', callback);
+}
+
+ServiceDwr.setKssService = function(p0, callback)
+{
+    DWREngine._execute('/tody/dwr', 'ServiceDwr', 'setKssService', p0, callback);
+}
+
+ServiceDwr.findService_type = function(p0, callback)
+{
+    DWREngine._execute('/tody/dwr', 'ServiceDwr', 'findService_type', p0, callback);
+}

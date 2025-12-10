@@ -1,0 +1,113 @@
+document.write("<link rel=\"stylesheet\" href=\"css/bootstrap_datepicker/bootstrap-datepicker3.standalone.min.css\">");
+document.write("<script type=\"text/javascript\" src=\"js/jquery/bootstrap_datepicker/bootstrap-datepicker.js\"></script>");
+document.write("<script type=\"text/javascript\" src=\"js/jquery/bootstrap_datepicker/bootstrap-datepicker.kr.min.js\"></script>");
+document.write("<script type=\"text/javascript\" src=\"js/common/moment.js\"></script>");
+
+	/*
+	 * 달력 생성 공통 함수 (Tims와 동일하게 사용)
+	 * 설명 : bootstrap datepicker 캘린더 생성
+	 * tagId : 해당 캘린더 input id
+	 * tagIdGubun : tagId 가 from일자인지 to일자인지 구분
+		1. FROM
+		2. TO
+	 * compareTagId : 비교대상 캘린더 input id
+	 * 단독으로 존재하는 캘린더의 겨우 tagIdGubun, compareTagId 값 불필요
+	 * ex1) fn_datepicker('retStDate', 'FROM', 'retEdDate');
+	 * ex2) fn_datepicker('retStDate');
+	 */
+
+	function fn_set_calendar(tagId, tagIdGubun, compareTagId) {
+		var jTagId = jQuery("#"+tagId+"");
+		var jCompareTagId = jQuery("#"+compareTagId+"");
+		 
+		jTagId.datepicker({
+			format: 'yyyy/mm/dd',			//날짜포맷
+			language: 'kr',					//달력언어
+			autoclose: true,				//날짜 클릭 시 캘린더 닫힘 여부
+			todayHighlight: true,			//오늘 날짜에 하이라이팅 여부
+			todayBtn: 'linked',				//오늘날짜 클릭 활성화
+			showOnFocus: false,				//input 박스 클릭 시 캘린더 활성화 여부
+			disableTouchKeyboard: true,		//모바일에서 작동여부
+			immediateUpdates : false,
+			templates: {
+	    		leftArrow: '<font>◀</font>',
+	    		rightArrow: '<font>▶</font>'
+	    	}
+		}).on('change', function(){
+			if(jTagId.val().length == 10) {
+				if(tagIdGubun == 'FROM') {
+					if(jCompareTagId.val() != '') {
+						if(!moment(jTagId.val()).isBefore(jCompareTagId.val())) {
+							jTagId.val(jCompareTagId.val());
+						}
+						jTagId.datepicker('setEndDate', new Date(jCompareTagId.val()));
+					}
+				jCompareTagId.datepicker('setStartDate', new Date(jTagId.val()));
+				} else if(tagIdGubun == 'TO') {
+					if(jCompareTagId.val() != '') {
+						if(!moment(jTagId.val()).isAfter(jCompareTagId.val())) {
+							jTagId.val(jCompareTagId.val());
+						}	 
+						jTagId.datepicker('setStartDate', new Date(jCompareTagId.val()));
+					}
+				jCompareTagId.datepicker('setEndDate', new Date(jTagId.val()));
+				}
+			} else {
+				if(tagIdGubun == 'FROM') {
+					jCompareTagId.datepicker('setStartDate', '');
+				} else if(tagIdGubun == 'TO') {
+					jCompareTagId.datepicker('setEndDate', '');
+				}
+			}
+		}).on('blur', function(){
+			if(jTagId.val().length < 10 && jTagId.val().length > 0 ) {
+				jTagId.val(moment().format('YYYY/MM/DD'));
+				jTagId.change();
+			}
+		}).on('keyup', function() {
+			inputDateFormat(this);
+		}).on('show', function() {
+			jTagId.datepicker('setViewMode', 0);				//일 calendar로 초기화
+			jTagId.val(jTagId.val()).datepicker('update');
+		});
+	}
+
+	/*
+	* 설명 : 캘린더 아이콘 클릭 시 캘린더 호출
+	*/
+	function fn_setDatepicker(e) {
+		var tagId = jQuery(e).attr('id');
+		tagId = jQuery("#"+tagId.replace('Img', '')+"");
+		tagId.datepicker('show');
+	}
+    
+	// 키보드 입력 시 날짜 유효성 체크
+    function inputDateFormat(obj){
+    	var datepickerChkDate = obj.value;
+    	var DataFormat = "";
+    	var RegDateFmt = "";
+    	if(obj.value.replace(/[0-9\/]/g, "").length == 0 ){ // 숫자 및 / 만 들어가 있는지 체크
+    	    if (datepickerChkDate.length <= 6) {
+    	        DataFormat = "$1/$2"; // 포맷(/)을 바꾸려면 이곳을 변경
+    	        RegDateFmt = /([0-9]{4})([0-9]+)/;
+    	    } else if (datepickerChkDate.length <= 9) {
+    	        DataFormat = "$1/$2/$3"; // 포맷(/)을 바꾸려면 이곳을 변경
+    	        RegDateFmt = /([0-9]{4})\/([0-9]{2})([0-9]+)/;
+    	    }
+    	    datepickerChkDate = datepickerChkDate.replace(RegDateFmt, DataFormat);    
+    	    obj.value = datepickerChkDate;
+    	}
+    	else{
+    		obj.value = obj.value.replace(/[^0-9^\/]/g,""); // 숫자 및 / 만 입력 가능하도록
+    	}
+    	
+	  	// 날짜 유효성 확인
+	 	if(datepickerChkDate.length == 10) {
+	    	var isValid = moment(datepickerChkDate,'YYYY/MM/DD',true).isValid();
+	    	if(!isValid) {
+	    		obj.value = moment().format('YYYY/MM/DD');
+	    		return;
+	    	}
+	    }
+		return; 
+   }

@@ -1,0 +1,343 @@
+/*
+	scrollbar-face-color: #3C7BF0;
+	scrollbar-shadow-color: #0A3078;
+	scrollbar-highlight-color: #0A3078;
+	scrollbar-3dlight-color: #0A3078;
+	scrollbar-darkshadow-color: #E9E9E9;
+	scrollbar-track-color: #E9E9E9;
+	scrollbar-arrow-color: #0A3078;
+*/
+
+body {
+	background-color: #ffffff;
+	/*font-family: Tahoma;*/
+	font-family: Pretendard-Regular;
+}
+input, textarea{
+	ime-mode:active;
+}
+.menu1 {
+	font-size: 13px;
+	color: #000;
+	text-decoration: none;
+}
+
+.menu1 a:link {
+	color: #000;
+	text-decoration: none;
+}
+
+.menu1 a:visited {
+	color: #000;
+	text-decoration: none;
+}
+
+.menu1 a:active {
+	color: #000;
+	text-decoration: none;
+}
+
+.menu1 a:hover {
+	color: #000;
+	text-decoration: none;
+}
+
+.link1 {
+	font-size: 12px;
+	color: #2f93c2;
+	text-decoration: none;
+	cursor: pointer;
+	vertical-align:sub;
+}
+
+.link1.verticalInit{
+	vertical-align:inherit;
+}
+
+.link1.active{
+  font-weight: bold; color:#002266;
+}
+
+.link1 a:link {
+	color: #2f93c2;
+	text-decoration: none;
+}
+
+.link1 a:visited {
+	color: #2f93c2;
+	text-decoration: none;
+}
+
+.link1 a:active {
+	color: #2f93c2;
+	text-decoration: none;
+}
+
+.link1 a:hover {
+	color: #2f93c2;
+	text-decoration: none;
+	font-weight:600;
+}
+
+.link1+span{padding-left: 10px;}
+
+.link2 {
+	font-size: 12px;
+	text-decoration: none;
+}
+
+.link2 a:link {
+	text-decoration: none;
+}
+
+.link2 a:visited {
+	text-decoration: none;
+}
+
+.link2 a:active {
+	text-decoration: none;
+}
+
+.link2 a:hover {
+	text-decoration: none;
+	font-weight:600;
+}
+
+.link3 {
+	color: #000000;
+	font-size: 12px;
+	text-decoration: none;
+	font-weight:400;
+}
+
+.link3 a:link {
+	color: #000;
+	text-decoration: none;
+}
+
+.link3 a:visited {
+	text-decoration: none;
+}
+
+.link3 a:active {
+	text-decoration: none;
+}
+
+.link3 a:hover {
+	font-weight:600;
+	text-decoration: none;
+}
+
+.tab1 {
+	font-size: 12px;
+	color: #000000;
+	text-decoration: none;
+}
+
+.tab1 a:link {
+	color: #000000;
+	text-decoration: none;
+}
+
+.tab1 a:visited {
+	color: #000000;
+	text-decoration: none;
+}
+
+.tab1 a:active {
+	color: #000000;
+	text-decoration: none;
+}
+
+.tab1 a:hover {
+	color: #000000;
+	text-decoration: none;
+}
+
+.page {
+	font-size: 12px;
+	color: #004080;
+	line-height: 18px;
+	font-weight: bold;
+}
+
+.page a:link {
+	color: #004080;
+	text-decoration: none;
+}
+
+.page a:visited {
+	color: #004080;
+	text-decoration: none;
+}
+
+.page a:active {
+	color: #004080;
+	text-decoration: none;
+}
+
+.page a:hover {
+	color: #004080;
+	text-decoration: none;
+}
+
+.blak {
+	font-size: 12px;
+	color: #000;
+}
+
+.data {
+	font-size: 12px;
+	color: #464646;
+	line-height: 16px;
+}
+
+.data2 {
+	font-size: 12px;
+	color: #464646;
+	line-height: 16px;
+}
+
+.title {
+	font-size: 12px;
+	color: #000000;
+}
+
+.title1 {
+	font-size: 12px;
+	color: #000000;
+	font-weight: bold;
+}
+
+.title2 {
+	font-size: 12px;
+	color: #c33f3f;
+}
+
+.title3 {
+	font-size: 12px;
+	color: #c33f3f;
+	font-weight: bold;
+}
+
+.title4 {
+	font-size: 12px;
+	color: #0a92a9;
+	font-weight: bold;
+}
+
+.title5 {
+	font-size: 12px;
+	color: #ffee7c;
+}
+
+.title6 {
+	font-size: 12px;
+	color: #000000;
+	font-weight: bold;
+	padding-left: 6px;
+  border: 1px solid #000;
+  background-color: #f8f9fa;
+  cursor: pointer;	
+}
+
+.title7 {
+	font-size: 12px;
+	color: #000000;
+	font-weight: bold;
+	padding-left: 6px;
+  border: 1px solid #000;
+  background-color: #f8f9fa;	
+}
+
+.input {
+	color: #777777;
+	font-size: 12px;
+	border: 1px solid #afadae;
+	height: 18px;
+	padding-top: 1px;
+}
+
+.input2 {
+	color: #777777;
+	font-size: 12px;
+	background-color: #f4f4f4;
+	border: 1px solid #afadae;
+	padding-left: 5px;
+	padding-top: 5px;
+}
+
+.remarks {
+	color: #777777;
+	font-size: 12px;
+	border: 1px solid #afadae;
+	height: 20px;
+	width: 24em;
+}
+
+.testMethods{
+	color: #777777;
+	font-size: 12px;
+	border: 1px solid #afadae;
+	padding-left: 5px;
+	padding-top: 5px;
+}
+
+.largeTextArea{
+	color: #777777;
+	font-size: 12px;
+	background-color: #f4f4f4;
+	border: 1px solid #afadae;
+	padding-left: 5px;
+	padding-top: 5px;
+}
+
+/* .textAreaControl{ */
+/* 	color: #777777; */
+/* 	font-size: 12px; */
+/* 	background-color: #f4f4f4; */
+/* 	border: 1px solid #afadae; */
+/* 	padding-left: 5px; */
+/* 	padding-top: 5px; */
+/* } */
+
+.input_disable {
+	color: #777777;
+	font-size: 12px;
+	background-color: #e5e5e5;
+	border: 1px solid #afadae;
+	height: 18px;
+	padding-top: 1px;
+}
+
+.dataMouseOut  {
+	font-size: 12px;
+	color: #464646;
+	line-height: 16px;
+}
+
+.dataMouseOver  {
+	background-color:#BECDFF; 
+	cursor:hand;
+	font-size: 12px;
+	color: #464646;
+	line-height: 16px;	
+}
+
+#TBCondition input { border: 1px solid #777; color: #000; font-size: 12px; }
+#TBCondition select, select-one, select-multiple { color: #000; font-size: 12px; }
+#TBCondition table tr td { font-size: 12px; }
+
+#_TBCondition input { border: 0; border-bottom: 1px solid #000; color: #000; font-size: 12px; }
+#_TBCondition select, select-one, select-multiple { color: #000; font-size: 12px; }
+#_TBCondition table tr td { font-size: 12px; }
+#_TBCondition td .data { background-color: #fff; }
+#_TBCondition td .input_disable { border: 0; }
+
+
+@font-face {
+    font-family: 'Pretendard-Regular';
+    src: url("/tody/font/Pretendard-Regular.woff") format('woff');
+    font-weight: 400;
+    font-style: normal;
+}

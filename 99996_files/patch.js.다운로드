@@ -1,0 +1,266 @@
+function searchPatchList(projectCode, siteCode, productCode, projectName, siteName) {
+	jQuery("#load").show();
+	location.href = context + "/ims/patch/patchList.do?projectCode="+projectCode+"&siteCode="+siteCode+"&productCode="+productCode+"&projectName="+projectName+"&siteName="+siteName;
+}
+
+function addAttachFile() {
+  var tableObj = document.getElementById("attachTable");
+  var tRows = tableObj.rows;
+  var tLength = tRows.length;
+  if (tLength >= 10) {
+    alert("Sorry! Cannot attach more than 10 files.");
+    return;
+  }
+  var newRow = tableObj.insertRow(tLength);
+  var newCell = newRow.insertCell(0);
+  newCell.className = "data";
+  newCell.innerHTML = getFileHTML(tLength);
+}
+
+function getFileHTML(index) {
+	s = "<input type=\"file\" name=\"uploadFiles[" + index + "]\" class=\"input uploadFilesClass\" style=\"width:380px; height: 25px;\" value=\"\" maxlength=\"400\">";
+	return s;
+}
+
+function addUrl() {
+  var tableObj = document.getElementById("urlTable");
+  var tRows = tableObj.rows;
+  var tLength = tRows.length;
+  var newRow = tableObj.insertRow(tLength);
+  var newCell = newRow.insertCell(0);
+  newCell.className = "data";
+  newCell.innerHTML = getUrlHTML(tLength);
+  document.getElementById("patchUrls_" + tLength).focus();
+}
+
+function getUrlHTML(index) {
+  s = "<input type=\"text\" id=\"patchUrls_" + index + "\" name=\"patchUrls\" style=\"width:380px;;ime-mode:inactive\" class=\"input patchUrlClass\">";
+  return s;
+}
+
+function formPatchUrl(form)
+{
+   var  flag = document.getElementById("approvalFlag");
+   if(flag.value=='Y'){
+      return confirm("Would you like to register this as an urgent patch?");
+   }else if (!confirm("Would you like to save?")){
+      return false;
+   }
+
+   //패치등록일자 사용자입력 삭제 :: 20111104
+   //var rtnVal = checkPatchDate();
+
+   //if(rtnVal) return true;
+   //else	return false;
+}
+
+function checkPatchDate(){
+
+  var tableObj = document.getElementById("attachTable");
+  var tRows = tableObj.rows;
+  var tLength = tRows.length;
+
+	for(var i=0; i<tLength; i++) {
+		if(document.getElementById("uploadFiles["+i+"]").value != "") {
+			if(document.getElementById("patchRegDate"+i).value == "") {
+				//alert("등록하신 패치파일의 패치등록일자를 입력 해 주시기 바랍니다.");
+				alert("please register the patch date of the selected file.");
+				document.getElementById("patchRegDate"+i).focus();
+				return false;
+			} else if(document.getElementById("patchRegTime"+i).value == "") {
+				//alert("등록하신 패치파일의 패치등록시간을 입력 해 주시기 바랍니다.");
+				alert("please register the patch time of the selected file.");
+				document.getElementById("patchRegTime"+i).focus();
+				return false;
+			}
+		}
+	}
+	return true;
+}
+
+var deleteAttachId = null;
+function deleteIssueAttach(issueId, attachId) {
+	var patchVeriCheck = document.getElementById("patchVeri").value;
+	if(patchVeriCheck == "Y"){
+		var pat = document.getElementsByName("patchFiles");
+		for ( var i = 0; i < pat.length; i++) {
+			var opt = pat[i];
+			for ( var j = 0; j < opt.options.length; j++) {
+				if(opt.options[j].value == attachId){
+					alert("Cannot delete patch File. \nDelete Patch Verification Document First.");
+					return;
+				}
+			}
+		}
+	}
+
+	if (confirm("Are you sure you want to delete the selected file?")) {
+		deleteAttachId = attachId;
+		AttachmentDwr.deleteIssueAttach(issueId, attachId, deleteIssueAttachAfterProcess);
+	}
+}
+
+function deleteIssueAttachAfterProcess(message) {
+	if (message == 1) {
+		jQuery("#attachId_" + deleteAttachId).remove();
+		jQuery("#attachId_" + deleteAttachId, opener.document).remove();	//부모창 삭제
+	}else if(message == 2){
+		alert("Cannot delete patch File. \nDelete Patch Verification Document First.");
+	}
+	else {
+		alert("Oops! An error occurred while deleting the file.");
+	}
+}
+
+var deleteUrlId = null;
+function deleteIssueUrl(issueId, urlId) {
+	if (confirm("Are you sure you want to delete the selected URL?")) {
+		deleteUrlId = urlId;
+		AttachmentDwr.deleteIssuePatchUrl(issueId, urlId, deleteIssuePatchUrlAfterProcess);
+	}
+}
+
+function deleteIssuePatchUrlAfterProcess(message) {
+	if (message == 1) {
+		jQuery("#urlId_" + deleteUrlId).remove();
+		jQuery("#urlId_" + deleteUrlId, opener.document).remove();	//부모창 삭제
+	} else {
+		alert("Oops! Error occurred while deleting the URL.");
+	}
+}
+
+function setApprovalFlag(){
+   var  flag = document.getElementById("approvalFlag");
+   if(flag.value=='N'){
+      flag.value = "Y";
+   }else{
+      flag.value = "N";
+   }
+}
+
+function setMergePatchFlag(){
+   var  flag = document.getElementById("mergeFlag");
+   if(flag.value=='N'){
+      flag.value = "Y";
+   }else{
+      flag.value = "N";
+   }
+}
+
+//패치 승인 단건
+function approvePatchFile(issueId, attachId, approvalId) {
+	if(confirm("Has the patch file been verified?")){
+		if(issueId != null && attachId != null && approvalId != null){
+			IssueDwr.approvePatchFile(issueId, attachId, approvalId, afterApprove);
+		}
+	}
+}
+
+//패치 승인 다건
+function approvePatchFiles(issueId, approvalId) {
+	var checkPatch = jQuery(".checkPatch:checked");
+
+	if(checkPatch.length > 0){
+		if(confirm("Has the patch file(s) been verified?")){
+			checkPatch.each(function() {
+				var attachId = jQuery(this).val();
+				if(issueId != null && attachId != null && approvalId != null){
+					IssueDwr.approvePatchFile(issueId, attachId, approvalId, afterApprove);
+				}
+			});
+		}
+	}
+}
+
+function afterApprove(data){
+	if(data != ''){
+		jQuery("#approvalBtn_" + data ).css("display", "none");
+		jQuery("#approvalCancelBtn_" + data ).css("display", "");
+		jQuery("#check_" + data ).prop("checked", false);
+		jQuery("#check_" + data ).prop("disabled", true);
+	}
+}
+
+//패치 승인 취소 단건
+function approveCancelPatchFile(issueId, attachId, approvalId) {
+	if(confirm("Are you sure you want to cancel patch file verification? \nThe patch is no longer available (no recognition, no re-cancellation).")){
+		if(issueId != null && attachId != null && approvalId != null){
+			IssueDwr.approveCancelPatchFile(issueId, attachId, approvalId, afterApproveCancel);
+		}
+	}
+}
+
+//패치 승인 취소 다건
+function approveCancelPatchFiles(issueId, approvalId) {
+	var checkPatch = jQuery(".checkPatch:checked");
+	
+	if(checkPatch.length > 0){
+		if(confirm("Are you sure you want to cancel patch file(s) verification? \nThe patch is no longer available (no recognition, no re-cancellation).")){
+			checkPatch.each(function() {
+				var attachId = jQuery(this).val();
+				if(issueId != null && attachId != null && approvalId != null){
+					IssueDwr.approveCancelPatchFile(issueId, attachId, approvalId, afterApproveCancel);
+				}
+			});
+		}
+	}
+}
+
+function afterApproveCancel(data){
+	if(data != ''){
+		location.reload();
+	}
+}
+
+//패치파일 전체선택/해제
+function patchFileCheckAll(){
+	if(jQuery("#checkAll").prop("checked")){
+		jQuery(".checkPatch:not(:disabled)").prop("checked", true);
+	}else{
+		jQuery(".checkPatch:not(:disabled)").prop("checked", false);
+	}
+}
+
+
+///////////////////
+//패치 URL 승인 단건
+function approvePatchUrl(issueId, urlId, approvalId) {
+	if(confirm("Has the patch url been verified?")){
+		if(issueId != null && urlId != null && approvalId != null){
+			IssueDwr.approvePatchUrl(issueId, urlId, approvalId, afterApproveUrl);
+		}
+	}
+}
+
+function afterApproveUrl(data){
+	if(data != ''){
+		jQuery("#approvalUrlBtn_" + data ).css("display", "none");
+		jQuery("#checkUrl_" + data ).prop("checked", false);
+		jQuery("#checkUrl_" + data ).prop("disabled", true);
+	}
+}
+
+//패치 URL 승인 다건
+function approvePatchUrls(issueId, approvalId) {
+	var checkPatch = jQuery(".checkPatchUrl:checked");
+
+	if(checkPatch.length > 0){
+		if(confirm("Has the patch url(s) been verified?")){
+			checkPatch.each(function() {
+				var urlId = jQuery(this).val();
+				if(issueId != null && urlId != null && approvalId != null){
+					IssueDwr.approvePatchUrl(issueId, urlId, approvalId, afterApproveUrl);
+				}
+			});
+		}
+	}
+}
+
+//패치URL 전체선택/해제
+function patchUrlCheckAll(){
+	if(jQuery("#checkUrlAll").prop("checked")){
+		jQuery(".checkPatchUrl:not(:disabled)").prop("checked", true);
+	}else{
+		jQuery(".checkPatchUrl:not(:disabled)").prop("checked", false);
+	}
+}

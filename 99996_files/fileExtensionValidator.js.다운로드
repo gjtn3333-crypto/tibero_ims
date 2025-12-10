@@ -1,0 +1,19 @@
+const ALLOWED_EXTENSIONS = [
+    ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp", ".pdf",
+    ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx", ".hwp",
+    ".txt", ".log", ".zip", ".tar", ".gz", ".7z", ".md5", ".xml",
+    ".jar", ".dat", ".out", ".java", ".dmp", ".dump", ".ctl", ".sha512",
+    ".sql"
+];
+
+// 허용되는 확장자인지 체크
+function isAllowedExtension(fileName) {
+    if (!fileName) return false;
+    const lower = fileName.trim().toLowerCase();
+    for (const ext of ALLOWED_EXTENSIONS) {
+        if (lower.endsWith(ext)) {
+            return true;
+        }
+    }
+    return false;
+}

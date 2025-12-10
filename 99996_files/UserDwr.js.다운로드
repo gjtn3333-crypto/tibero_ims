@@ -1,0 +1,32 @@
+
+function UserDwr() { }
+
+UserDwr.setUserService = function(p0, callback)
+{
+    DWREngine._execute('/tody/dwr', 'UserDwr', 'setUserService', p0, callback);
+}
+
+UserDwr.findModuleManagers = function(p0, p1, p2, callback)
+{
+    DWREngine._execute('/tody/dwr', 'UserDwr', 'findModuleManagers', p0, p1, p2, callback);
+}
+
+UserDwr.setModuleService = function(p0, callback)
+{
+    DWREngine._execute('/tody/dwr', 'UserDwr', 'setModuleService', p0, callback);
+}
+
+UserDwr.findUsersByNameAll = function(p0, callback)
+{
+    DWREngine._execute('/tody/dwr', 'UserDwr', 'findUsersByNameAll', p0, callback);
+}
+
+UserDwr.findUsersByName = function(p0, callback)
+{
+    DWREngine._execute('/tody/dwr', 'UserDwr', 'findUsersByName', p0, callback);
+}
+
+UserDwr.findUser = function(p0, callback)
+{
+    DWREngine._execute('/tody/dwr', 'UserDwr', 'findUser', p0, callback);
+}

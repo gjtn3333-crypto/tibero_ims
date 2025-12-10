@@ -1,0 +1,120 @@
+function chooseUser(mailType, formId) {
+
+	var f = document.userListForm;
+	if (f.userInfo == null) return;
+	if (!isChecked(f.userInfo)) {
+    	alert("Oops! Cannot find the selected user.");
+    	return;   
+	}
+  
+	if(!isNull(mailType)){
+  		var obj = null;
+		if (mailType == "T") {
+			if((formId != null) && (formId == "processForm")) {
+				obj = opener.document.processForm.mailToIH;
+			}
+			else {
+				obj = opener.document.commentForm.mailTo;
+			}
+		} else {
+			if((formId != null) && (formId == "processForm")) {
+				obj = opener.document.processForm.mailCcIH;
+			}
+			else {
+				obj = opener.document.commentForm.mailCc;
+			}
+		}
+		var infoStr = null;
+		var cnt = f.userInfo.length;
+		if (cnt == null || cnt == 1) {
+			infoStr = f.userInfo.value;
+			var user = infoStr.split(";");
+			if (!isDuplicateEmail(user[1], obj)) {
+				opener.addEmail(mailType, user[0], user[1], formId);
+			}
+		} else {
+			for (var i=0; i<f.userInfo.length; i++) {
+				if (f.userInfo[i].checked == true) {
+					infoStr = f.userInfo[i].value;
+					var user = infoStr.split(";");
+					if (!isDuplicateEmail(user[1], obj)) {
+						opener.addEmail(mailType, user[0], user[1], formId);
+					}
+				}
+			}
+		}
+	}
+	self.close();
+}
+
+/*
+function chooseUser(mailType) {
+	var f = document.userListForm;
+	if (f.userInfo == null) return;
+	if (!isChecked(f.userInfo)) {
+    	alert("Oops! Cannot find the selected user.");
+    	return;   
+	}
+  
+	if(!isNull(mailType)){
+  		var obj = null;
+		if (mailType == "T") {
+			obj = opener.document.commentForm.mailTo;
+		} else {
+			obj = opener.document.commentForm.mailCc;
+		}
+		var infoStr = null;
+		var cnt = f.userInfo.length;
+		if (cnt == null || cnt == 1) {
+			infoStr = f.userInfo.value;
+			var user = infoStr.split(";");
+			if (!isDuplicateEmail(user[1], obj)) {
+				opener.addEmail(mailType, user[0], user[1]);
+			}
+		} else {
+			for (var i=0; i<f.userInfo.length; i++) {
+				if (f.userInfo[i].checked == true) {
+					infoStr = f.userInfo[i].value;
+					var user = infoStr.split(";");
+					if (!isDuplicateEmail(user[1], obj)) {
+						opener.addEmail(mailType, user[0], user[1]);
+					}
+				}
+			}
+		}
+	}
+	self.close();
+}
+*/
+
+function isDuplicateEmail(email, dest) {
+	var opt = null;
+	for (var i=0; i<dest.length; i++) {
+		opt = dest.options[i];
+    	if (email == opt.value) {
+      		return true;
+    	}
+	}
+	return false;
+}
+
+function allCheck(flag, id) 
+{    
+	var checkBox = document.getElementsByName(id);
+
+	if (isNull(checkBox)) {
+		return;
+	}
+	
+	var cbLength = checkBox.length;
+
+	if (isNull(cbLength)) {
+		checkBox.checked = flag;
+	} else {
+		for (var i=0; i<cbLength; i++) {
+			checkBox[i].checked = flag;
+		}
+	}
+		
+	checkFlag = !flag;
+}

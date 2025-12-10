@@ -1,0 +1,50 @@
+// browser type
+var IE  = document.all;
+var NS = document.getElementById && !document.all;
+
+
+function getCurrentSearchWidth(){
+	var window_width = jQuery(window).width();
+	var navi_width = 220;
+	var result = window_width - navi_width; 
+	return result;
+}
+
+function getCurrentSearchHeight(){
+	var window_height = jQuery(window).height();
+	var footer_height = 23;
+	var heightResult = window_height - footer_height; 
+	return heightResult;
+}
+
+jQuery(document).ready(function(){	
+	jQuery(".variable_width").width( getCurrentSearchWidth());
+	jQuery(".variable_width_table").width( getCurrentSearchWidth()-25);
+	if(jQuery(".variable_height_table").height() > jQuery(window).height()){
+		jQuery(".variable_height").height( getCurrentSearchHeight());
+	}
+});
+
+jQuery(window).resize(function(){
+	jQuery(".variable_width").width( getCurrentSearchWidth());
+	jQuery(".variable_width_table").width( getCurrentSearchWidth()-25);
+	if(jQuery(".variable_height_table").height() > jQuery(window).height()){
+		jQuery(".variable_height").height( getCurrentSearchHeight());
+	}
+});
+
+
+function ajaxExcelDown( form ){
+	jQuery("#load").show();
+	jQuery.fileDownload( jQuery(form).attr('action') , {
+		data : jQuery(form).serialize(),
+		httpMethod : 'GET',
+		successCallback : function(url){
+			jQuery("#load").hide();
+		},
+		failCallback : function(responseHtml, url){
+			jQuery("#load").hide();
+			alert('다운로드에 실패하였습니다. 다시시도해 주시기 바랍니다.');
+		}
+	})
+}

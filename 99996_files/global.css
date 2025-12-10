@@ -1,0 +1,12 @@
+img {
+	border: 0;
+}
+
+.input_text {
+	color: #777777;
+	font-size: 11px;
+	background-color: #f4f4f4;
+	border: 1px solid #afadae;
+	height: 18px;
+	padding-top: 1px;
+}

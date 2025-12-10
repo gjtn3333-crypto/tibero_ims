@@ -1,0 +1,72 @@
+
+function RequirementDwr() { }
+
+RequirementDwr.setUserService = function(p0, callback)
+{
+    DWREngine._execute('/tody/dwr', 'RequirementDwr', 'setUserService', p0, callback);
+}
+
+RequirementDwr.setTmsProjectService = function(p0, callback)
+{
+    DWREngine._execute('/tody/dwr', 'RequirementDwr', 'setTmsProjectService', p0, callback);
+}
+
+RequirementDwr.setTmsSystemEnvironmentService = function(p0, callback)
+{
+    DWREngine._execute('/tody/dwr', 'RequirementDwr', 'setTmsSystemEnvironmentService', p0, callback);
+}
+
+RequirementDwr.copyAndPaste = function(p0, p1, p2, p3, callback)
+{
+    DWREngine._execute('/tody/dwr', 'RequirementDwr', 'copyAndPaste', p0, p1, p2, p3, callback);
+}
+
+RequirementDwr.cutAndPaste = function(p0, p1, p2, p3, callback)
+{
+    DWREngine._execute('/tody/dwr', 'RequirementDwr', 'cutAndPaste', p0, p1, p2, p3, callback);
+}
+
+RequirementDwr.setRequirementService = function(p0, callback)
+{
+    DWREngine._execute('/tody/dwr', 'RequirementDwr', 'setRequirementService', p0, callback);
+}
+
+RequirementDwr.getRequirementSubItems = function(p0, p1, p2, p3, p4, p5, callback)
+{
+    DWREngine._execute('/tody/dwr', 'RequirementDwr', 'getRequirementSubItems', p0, p1, p2, p3, p4, p5, callback);
+}
+
+RequirementDwr.deleteRequirement = function(p0, p1, callback)
+{
+    DWREngine._execute('/tody/dwr', 'RequirementDwr', 'deleteRequirement', p0, p1, callback);
+}
+
+RequirementDwr.updateRequirementOrder = function(p0, p1, p2, p3, callback)
+{
+    DWREngine._execute('/tody/dwr', 'RequirementDwr', 'updateRequirementOrder', p0, p1, p2, p3, callback);
+}
+
+RequirementDwr.requestRecognitionRequirements = function(p0, p1, p2, callback)
+{
+    DWREngine._execute('/tody/dwr', 'RequirementDwr', 'requestRecognitionRequirements', p0, p1, p2, callback);
+}
+
+RequirementDwr.recognizeRequirements = function(p0, p1, p2, callback)
+{
+    DWREngine._execute('/tody/dwr', 'RequirementDwr', 'recognizeRequirements', p0, p1, p2, callback);
+}
+
+RequirementDwr.returnRequirements = function(p0, p1, p2, callback)
+{
+    DWREngine._execute('/tody/dwr', 'RequirementDwr', 'returnRequirements', p0, p1, p2, callback);
+}
+
+RequirementDwr.getRequirement = function(p0, p1, callback)
+{
+    DWREngine._execute('/tody/dwr', 'RequirementDwr', 'getRequirement', p0, p1, callback);
+}
+
+RequirementDwr.setSimpleMailSender = function(p0, callback)
+{
+    DWREngine._execute('/tody/dwr', 'RequirementDwr', 'setSimpleMailSender', p0, callback);
+}
